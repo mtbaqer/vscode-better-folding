@@ -10,16 +10,12 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:better-folding.helloWorld"
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "better-folding.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

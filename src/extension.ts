@@ -1,5 +1,7 @@
-import * as vscode from "vscode";
+import { ExtensionContext, window } from "vscode";
 
-export function activate(context: vscode.ExtensionContext) {}
+export function activate(context: ExtensionContext) {
+  console.log("activate");
+}
 
 export function deactivate() {}
