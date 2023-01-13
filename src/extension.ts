@@ -15,7 +15,7 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     window.onDidChangeTextEditorVisibleRanges((e) => {
       if (e) {
-        console.log("onDidChangeTextEditorVisibleRanges");
+        foldingDecorator.triggerUpdateDecorations();
       }
     })
   );

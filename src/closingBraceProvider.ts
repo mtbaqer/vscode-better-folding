@@ -1,3 +1,4 @@
+import { FoldingRangeKind } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 
 const closingBraceProvider: BetterFoldingRangeProvider = {
@@ -22,6 +23,8 @@ const closingBraceProvider: BetterFoldingRangeProvider = {
           start: startPosition.line,
           end: endPosition.line,
           startColumn: braceIndex,
+          kind: FoldingRangeKind.Region,
+          collapsedText: "{…}",
         });
       }
     }
