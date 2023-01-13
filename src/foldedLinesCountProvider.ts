@@ -1,4 +1,5 @@
-import { FoldingRangeKind } from "vscode";
+import { workspace } from "vscode";
+import { EXTENSION_ID, FOLD_CLOSING_BRACE_ID } from "./constants";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 
 const foldedLinesCountProvider: BetterFoldingRangeProvider = {
@@ -18,13 +19,15 @@ const foldedLinesCountProvider: BetterFoldingRangeProvider = {
 
       const braceIndex = match[0].indexOf("{");
 
+      const foldingClosingBrace = workspace.getConfiguration(EXTENSION_ID).get<string[]>(FOLD_CLOSING_BRACE_ID);
+      const collapsedText = `⋯ ${endPosition.line - startPosition.line - 1} lines ⋯`;
+
       if (startPosition.line !== endPosition.line) {
         ranges.push({
           start: startPosition.line,
-          end: endPosition.line,
-          startColumn: braceIndex,
-          kind: FoldingRangeKind.Region,
-          collapsedText: `{ ⋯ ${endPosition.line - startPosition.line - 1} lines ⋯ }`,
+          end: foldingClosingBrace ? endPosition.line : endPosition.line - 1,
+          startColumn: foldingClosingBrace ? braceIndex : undefined,
+          collapsedText: foldingClosingBrace ? `{ ${collapsedText} }` : collapsedText,
         });
       }
     }

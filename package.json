@@ -15,7 +15,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": []
+    "configuration": {
+      "title": "Better Folding",
+      "properties": {
+        "better-folding.foldClosingBrace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include closing braces like } and ] in folding areas."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
