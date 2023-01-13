@@ -14,11 +14,11 @@ export function activate(context: ExtensionContext) {
 
   context.subscriptions.push(
     window.onDidChangeTextEditorVisibleRanges((e) => {
-      if (e) {
-        foldingDecorator.triggerUpdateDecorations();
-      }
+      if (e) foldingDecorator.triggerUpdateDecorations();
     })
   );
+
+  foldingDecorator.triggerUpdateDecorations();
 }
 
 export function deactivate() {}
