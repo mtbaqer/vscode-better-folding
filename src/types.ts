@@ -1,11 +1,4 @@
-import {
-  CancellationToken,
-  FoldingContext,
-  FoldingRange,
-  FoldingRangeKind,
-  ProviderResult,
-  TextDocument,
-} from "vscode";
+import { CancellationToken, FoldingContext, FoldingRange, FoldingRangeKind, TextDocument } from "vscode";
 
 export interface BetterFoldingRange extends FoldingRange {
   start: number;
@@ -18,7 +11,7 @@ export interface BetterFoldingRange extends FoldingRange {
 export interface BetterFoldingRangeProvider {
   provideFoldingRanges(
     document: TextDocument,
-    context: FoldingContext,
-    token: CancellationToken
-  ): ProviderResult<BetterFoldingRange[]>;
+    context?: FoldingContext,
+    token?: CancellationToken
+  ): BetterFoldingRange[];
 }
