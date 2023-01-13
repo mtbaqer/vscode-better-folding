@@ -74,7 +74,7 @@ export default class FoldingDecorator {
   private newDecorationOption(contentText: string): DecorationRenderOptions {
     return {
       textDecoration: "none; display:none;", //Hides the folded text
-      after: {
+      before: {
         contentText,
         color: "rgba(255, 255, 255, 0.5)", //TODO: Get this from the theme
         margin: `0 -${100}% 0 0`, //Hides the original collapsed text '…'
@@ -107,7 +107,7 @@ export default class FoldingDecorator {
       const decoration = window.createTextEditorDecorationType(decorationOption);
       decorations.push(decoration);
 
-      const foldingRanges = collapsedTextToFoldingRanges[decorationOption.after!.contentText!];
+      const foldingRanges = collapsedTextToFoldingRanges[decorationOption.before!.contentText!];
       const ranges: Range[] = foldingRanges.map(this.foldingRangeToRange(activeEditor.document));
 
       const foldedRanges: Range[] = [];
