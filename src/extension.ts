@@ -5,6 +5,7 @@ import FoldingDecorator from "./foldingDecorator";
 
 export function activate(context: ExtensionContext) {
   const foldingDecorator = new FoldingDecorator();
+  context.subscriptions.push(foldingDecorator);
 
   // Courtesy of vscode-explicit-fold,
   // apparently if you delay the folding provider by a second, it can override the default language folding provider.

@@ -1,15 +1,17 @@
-import { DecorationRenderOptions, Range, TextDocument, TextEditorDecorationType, window } from "vscode";
+import { DecorationRenderOptions, Disposable, Range, TextDocument, TextEditorDecorationType, window } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
-export default class FoldingDecorator {
+export default class FoldingDecorator extends Disposable {
   timeout: NodeJS.Timer | undefined = undefined;
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
   decorations: TextEditorDecorationType[] = [];
   unfoldedDecoration = window.createTextEditorDecorationType({});
 
-  constructor() {}
+  constructor() {
+    super(() => this.clearDecorations());
+  }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {
     if (!this.providers[selector]) {
