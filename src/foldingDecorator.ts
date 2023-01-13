@@ -7,6 +7,7 @@ export default class FoldingDecorator {
   timeout: NodeJS.Timer | undefined = undefined;
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
   decorations: TextEditorDecorationType[] = [];
+  unfoldedDecoration = window.createTextEditorDecorationType({});
 
   constructor() {}
 
@@ -25,7 +26,7 @@ export default class FoldingDecorator {
       this.timeout = setTimeout(() => {
         clearTimeout(this.timeout);
         this.timeout = undefined;
-      }, 1000);
+      }, 100);
     }
   }
 
@@ -33,9 +34,16 @@ export default class FoldingDecorator {
     let activeEditor = window.activeTextEditor;
     if (!activeEditor) return;
 
+    this.clearDecorations();
+
     const foldingRanges = this.getRanges(activeEditor.document);
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
-    this.applyDecorations(foldingRanges, decorationOptions);
+    this.decorations = this.applyDecorations(foldingRanges, decorationOptions);
+  }
+
+  private clearDecorations() {
+    this.decorations.forEach((decoration) => decoration.dispose());
+    this.unfoldedDecoration.dispose();
   }
 
   private getRanges(document: TextDocument): BetterFoldingRange[] {
@@ -75,9 +83,12 @@ export default class FoldingDecorator {
     };
   }
 
-  private applyDecorations(foldingRanges: BetterFoldingRange[], decorationOptions: DecorationRenderOptions[]) {
+  private applyDecorations(
+    foldingRanges: BetterFoldingRange[],
+    decorationOptions: DecorationRenderOptions[]
+  ): TextEditorDecorationType[] {
     const activeEditor = window.activeTextEditor;
-    if (!activeEditor) return;
+    if (!activeEditor) return [];
 
     const collapsedTextToFoldingRanges: Record<string, BetterFoldingRange[]> = {};
     for (const foldingRange of foldingRanges) {
@@ -89,15 +100,27 @@ export default class FoldingDecorator {
       collapsedTextToFoldingRanges[collapsedText].push(foldingRange);
     }
 
+    const decorations: TextEditorDecorationType[] = [];
+
+    const unfoldedRanges: Range[] = [];
     for (const decorationOption of decorationOptions) {
       const decoration = window.createTextEditorDecorationType(decorationOption);
+      decorations.push(decoration);
 
-      const collapsedText = decorationOption.after!.contentText!;
-      const foldingRanges = collapsedTextToFoldingRanges[collapsedText];
+      const foldingRanges = collapsedTextToFoldingRanges[decorationOption.after!.contentText!];
       const ranges: Range[] = foldingRanges.map(this.foldingRangeToRange(activeEditor.document));
 
-      activeEditor.setDecorations(decoration, ranges);
+      const foldedRanges: Range[] = [];
+      for (const range of ranges) {
+        if (this.isFolded(range)) foldedRanges.push(range);
+        else unfoldedRanges.push(range);
+      }
+
+      activeEditor.setDecorations(decoration, foldedRanges);
     }
+    activeEditor.setDecorations(this.unfoldedDecoration, unfoldedRanges);
+
+    return decorations;
   }
 
   private foldingRangeToRange(document: TextDocument): (foldingRange: BetterFoldingRange) => Range {
@@ -108,5 +131,16 @@ export default class FoldingDecorator {
         foldingRange.end,
         document.lineAt(foldingRange.end).text.length
       );
+  }
+
+  private isFolded(range: Range): boolean {
+    let activeEditor = window.activeTextEditor;
+    if (!activeEditor) return false;
+
+    for (let i = 0; i < activeEditor.visibleRanges.length - 1; i++) {
+      const visibleRange = activeEditor.visibleRanges[i];
+      if (visibleRange.end.line === range.start.line) return true;
+    }
+    return false;
   }
 }
