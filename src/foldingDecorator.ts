@@ -1,5 +1,14 @@
-import { DecorationRenderOptions, Disposable, Range, TextDocument, TextEditorDecorationType, window } from "vscode";
+import {
+  DecorationRenderOptions,
+  Disposable,
+  Range,
+  TextDocument,
+  TextEditor,
+  TextEditorDecorationType,
+  window,
+} from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
+import { foldingRangeToRange, groupArrayToMap } from "./utils";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
@@ -22,8 +31,11 @@ export default class FoldingDecorator extends Disposable {
   }
 
   public triggerUpdateDecorations() {
+    let activeEditor = window.activeTextEditor;
+    if (!activeEditor) return;
+
     if (!this.timeout) {
-      this.updateDecorations();
+      this.updateDecorations(activeEditor);
 
       this.timeout = setTimeout(() => {
         clearTimeout(this.timeout);
@@ -32,15 +44,12 @@ export default class FoldingDecorator extends Disposable {
     }
   }
 
-  private updateDecorations() {
-    let activeEditor = window.activeTextEditor;
-    if (!activeEditor) return;
-
+  private updateDecorations(activeEditor: TextEditor) {
     this.clearDecorations();
 
     const foldingRanges = this.getRanges(activeEditor.document);
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
-    this.decorations = this.applyDecorations(foldingRanges, decorationOptions);
+    this.decorations = this.applyDecorations(activeEditor, foldingRanges, decorationOptions);
   }
 
   private clearDecorations() {
@@ -89,21 +98,11 @@ export default class FoldingDecorator extends Disposable {
   }
 
   private applyDecorations(
+    activeEditor: TextEditor,
     foldingRanges: BetterFoldingRange[],
     decorationOptions: DecorationRenderOptions[]
   ): TextEditorDecorationType[] {
-    const activeEditor = window.activeTextEditor;
-    if (!activeEditor) return [];
-
-    const collapsedTextToFoldingRanges: Record<string, BetterFoldingRange[]> = {};
-    for (const foldingRange of foldingRanges) {
-      const collapsedText = foldingRange.collapsedText ?? DEFAULT_COLLAPSED_TEXT;
-      if (!(collapsedText in collapsedTextToFoldingRanges)) {
-        collapsedTextToFoldingRanges[collapsedText] = [];
-      }
-
-      collapsedTextToFoldingRanges[collapsedText].push(foldingRange);
-    }
+    const collapsedTextToFoldingRanges = groupArrayToMap(foldingRanges, (foldingRange) => foldingRange.collapsedText);
 
     const decorations: TextEditorDecorationType[] = [];
 
@@ -112,12 +111,12 @@ export default class FoldingDecorator extends Disposable {
       const decoration = window.createTextEditorDecorationType(decorationOption);
       decorations.push(decoration);
 
-      const foldingRanges = collapsedTextToFoldingRanges[decorationOption.before!.contentText!];
-      const ranges: Range[] = foldingRanges.map(this.foldingRangeToRange(activeEditor.document));
+      const foldingRanges = collapsedTextToFoldingRanges.get(decorationOption.before!.contentText!)!;
+      const ranges: Range[] = foldingRanges.map(foldingRangeToRange(activeEditor.document));
 
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
-        if (this.isFolded(range)) foldedRanges.push(range);
+        if (this.isFolded(range, activeEditor.visibleRanges)) foldedRanges.push(range);
         else unfoldedRanges.push(range);
       }
 
@@ -128,22 +127,9 @@ export default class FoldingDecorator extends Disposable {
     return decorations;
   }
 
-  private foldingRangeToRange(document: TextDocument): (foldingRange: BetterFoldingRange) => Range {
-    return (foldingRange) =>
-      new Range(
-        foldingRange.start,
-        foldingRange.startColumn ?? document.lineAt(foldingRange.start).text.length,
-        foldingRange.end,
-        document.lineAt(foldingRange.end).text.length
-      );
-  }
-
-  private isFolded(range: Range): boolean {
-    let activeEditor = window.activeTextEditor;
-    if (!activeEditor) return false;
-
-    for (let i = 0; i < activeEditor.visibleRanges.length - 1; i++) {
-      const visibleRange = activeEditor.visibleRanges[i];
+  private isFolded(range: Range, visibleRanges: readonly Range[]): boolean {
+    for (let i = 0; i < visibleRanges.length - 1; i++) {
+      const visibleRange = visibleRanges[i];
       if (visibleRange.end.line === range.start.line) return true;
     }
     return false;

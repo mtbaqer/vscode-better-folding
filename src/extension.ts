@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, languages, window } from "vscode";
+import { ExtensionContext, languages, window } from "vscode";
 import { BracketRangesProvider } from "./bracketRangesProvider";
 import FoldingDecorator from "./foldingDecorator";
 
