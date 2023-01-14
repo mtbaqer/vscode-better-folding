@@ -21,7 +21,7 @@
         "better-folding.foldClosingBrackets": {
           "type": "boolean",
           "default": true,
-          "description": "Include closing brackets like } and ] in the folding range."
+          "markdownDescription": "Include closing brackets like `}` and `]` in the folding range."
         },
         "better-folding.collapsedTextContent": {
           "type": "string",
