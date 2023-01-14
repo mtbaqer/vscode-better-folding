@@ -18,10 +18,10 @@
     "configuration": {
       "title": "Better Folding",
       "properties": {
-        "better-folding.foldClosingBrace": {
+        "better-folding.foldClosingBrackets": {
           "type": "boolean",
           "default": true,
-          "description": "Include closing braces like } and ] in the folding range."
+          "description": "Include closing brackets like } and ] in the folding range."
         },
         "better-folding.collapsedTextContent": {
           "type": "string",

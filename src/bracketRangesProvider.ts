@@ -1,6 +1,6 @@
 import { Position, TextDocument, workspace } from "vscode";
-import { COLLAPSED_TEXT_CONTENT, EXTENSION_ID, FOLD_CLOSING_BRACE } from "./constants";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
+import * as config from "./configuration";
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(document: TextDocument): BetterFoldingRange[] {
@@ -18,15 +18,15 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       const endPosition = document.positionAt(match.index + match[0].length);
       const braceIndex = match[0].indexOf("{");
 
-      const foldClosingBrace = workspace.getConfiguration(EXTENSION_ID).get<string>(FOLD_CLOSING_BRACE);
+      const foldClosingBrackets = config.foldClosingBrackets();
 
       const collapsedText = this.getCollapsedText(match, startPosition, endPosition);
 
       if (startPosition.line !== endPosition.line) {
         ranges.push({
           start: startPosition.line,
-          end: foldClosingBrace ? endPosition.line : endPosition.line - 1,
-          startColumn: foldClosingBrace ? braceIndex : undefined,
+          end: foldClosingBrackets ? endPosition.line : endPosition.line - 1,
+          startColumn: foldClosingBrackets ? braceIndex : undefined,
           collapsedText,
         });
       }
@@ -36,14 +36,15 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getCollapsedText(match: RegExpExecArray, startPosition: Position, endPosition: Position) {
-    const foldClosingBrace = workspace.getConfiguration(EXTENSION_ID).get<string>(FOLD_CLOSING_BRACE);
-    const collapsedTextConfiguration = workspace.getConfiguration(EXTENSION_ID).get<string>(COLLAPSED_TEXT_CONTENT);
+    const foldClosingBrackets = config.foldClosingBrackets();
+
+    const collapsedTextStrategy = config.collapsedTextStrategy();
 
     let collapsedText = "…";
-    if (collapsedTextConfiguration === "number of lines folded") {
+    if (collapsedTextStrategy === "number of lines folded") {
       collapsedText = ` ⋯ ${endPosition.line - startPosition.line - 1} lines ⋯ `;
     }
 
-    return foldClosingBrace ? `{${collapsedText}}` : collapsedText;
+    return foldClosingBrackets ? `{${collapsedText}}` : collapsedText;
   }
 }
