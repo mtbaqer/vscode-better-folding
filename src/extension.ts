@@ -1,6 +1,5 @@
 import { ExtensionContext, languages, window } from "vscode";
-import closingBraceProvider from "./closingBraceProvider";
-import foldedLinesCountProvider from "./foldedLinesCountProvider";
+import { BracketRangesProvider } from "./bracketRangesProvider";
 import FoldingDecorator from "./foldingDecorator";
 
 export function activate(context: ExtensionContext) {
@@ -10,9 +9,9 @@ export function activate(context: ExtensionContext) {
   // Courtesy of vscode-explicit-fold,
   // apparently if you delay the folding provider by a second, it can override the default language folding provider.
   setTimeout(() => {
-    context.subscriptions.push(languages.registerFoldingRangeProvider("typescript", closingBraceProvider));
-    // foldingDecorator.registerFoldingRangeProvider("typescript", closingBraceProvider);
-    foldingDecorator.registerFoldingRangeProvider("typescript", foldedLinesCountProvider);
+    const bracketRangesProvider = new BracketRangesProvider();
+    context.subscriptions.push(languages.registerFoldingRangeProvider("typescript", bracketRangesProvider));
+    foldingDecorator.registerFoldingRangeProvider("typescript", bracketRangesProvider);
   }, 1000);
 
   context.subscriptions.push(
