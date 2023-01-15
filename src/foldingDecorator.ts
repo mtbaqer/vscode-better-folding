@@ -18,6 +18,9 @@ export default class FoldingDecorator extends Disposable {
   decorations: TextEditorDecorationType[] = [];
   unfoldedDecoration = window.createTextEditorDecorationType({});
 
+  //TODO: do a per text editor cache
+  cachedFoldedLines: number[] = [];
+
   constructor() {
     super(() => this.clearDecorations());
   }
@@ -30,11 +33,12 @@ export default class FoldingDecorator extends Disposable {
     this.providers[selector].push(provider);
   }
 
-  public triggerUpdateDecorations() {
+  public triggerUpdateDecorations(clearCache = false) {
     let activeEditor = window.activeTextEditor;
     if (!activeEditor) return;
 
     if (!this.timeout) {
+      if (clearCache) this.clearCache();
       this.updateDecorations(activeEditor);
 
       this.timeout = setTimeout(() => {
@@ -46,6 +50,8 @@ export default class FoldingDecorator extends Disposable {
 
   private updateDecorations(activeEditor: TextEditor) {
     this.clearDecorations();
+
+    this.cacheFoldedLines(activeEditor.visibleRanges);
 
     const foldingRanges = this.getRanges(activeEditor.document);
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
@@ -116,7 +122,7 @@ export default class FoldingDecorator extends Disposable {
 
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
-        if (this.isFolded(range, activeEditor.visibleRanges)) foldedRanges.push(range);
+        if (this.isFolded(range.start.line)) foldedRanges.push(range);
         else unfoldedRanges.push(range);
       }
 
@@ -127,11 +133,36 @@ export default class FoldingDecorator extends Disposable {
     return decorations;
   }
 
-  private isFolded(range: Range, visibleRanges: readonly Range[]): boolean {
-    for (let i = 0; i < visibleRanges.length - 1; i++) {
-      const visibleRange = visibleRanges[i];
-      if (visibleRange.end.line === range.start.line) return true;
+  private isFolded(line: number): boolean {
+    for (const cachedFoldedLine of this.cachedFoldedLines) {
+      if (cachedFoldedLine === line) return true;
     }
     return false;
+  }
+
+  private cacheFoldedLines(visibleRanges: readonly Range[]) {
+    if (visibleRanges.length === 0) return;
+
+    if (this.cachedFoldedLines.length === 0) {
+      this.cachedFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
+      return;
+    }
+
+    const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
+    const newFoldedLines = currentFoldedLines.filter((line) => !this.cachedFoldedLines.includes(line));
+    this.cachedFoldedLines.push(...newFoldedLines);
+    this.cachedFoldedLines.sort((a, b) => a - b); //TODO: Optimize this by inserting lines in the right place.
+
+    const currentFoldedLinesSet = new Set(currentFoldedLines);
+    this.cachedFoldedLines = this.cachedFoldedLines.filter(
+      (line) =>
+        currentFoldedLinesSet.has(line) ||
+        line <= visibleRanges[0].start.line ||
+        line >= visibleRanges[visibleRanges.length - 1].end.line
+    );
+  }
+
+  private clearCache() {
+    this.cachedFoldedLines = [];
   }
 }

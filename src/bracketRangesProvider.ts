@@ -1,4 +1,4 @@
-import { Position, TextDocument, workspace } from "vscode";
+import { Position, TextDocument } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
 

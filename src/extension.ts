@@ -24,7 +24,7 @@ export function activate(context: ExtensionContext) {
     window.onDidChangeActiveTextEditor((e) => {
       // This is a hack to get around the fact that visible ranges are cleared when the document is changed.
       // Even when some ranges are folded.
-      if (e) setTimeout(() => foldingDecorator.triggerUpdateDecorations(), 150);
+      if (e) setTimeout(() => foldingDecorator.triggerUpdateDecorations(true), 150);
     })
   );
 
