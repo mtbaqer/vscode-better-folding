@@ -1,33 +1,31 @@
 import { Position, TextDocument } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
+import * as parser from "@typescript-eslint/typescript-estree";
+import { ProgramStatement } from "@typescript-eslint/types/dist/generated/ast-spec";
+
+const BRACKETS = {
+  "{": "}",
+  "[": "]",
+  "(": ")",
+  "<": ">",
+  "`": "`",
+};
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(document: TextDocument): BetterFoldingRange[] {
     const ranges: BetterFoldingRange[] = [];
 
-    //regex to match functions in typescript
-    const functionRegex =
-      /function\s*([A-z0-9]+)?\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*\{(?:[^}{]+|\{(?:[^}{]+|\{[^}{]*\})*\})*\}/g;
+    const asTree = parser.parse(document.getText(), { loc: true });
+    const { body } = asTree;
 
-    let match;
-    while ((match = functionRegex.exec(document.getText()))) {
-      if (match && !match[0]) continue;
-
-      const startPosition = document.positionAt(match.index);
-      const endPosition = document.positionAt(match.index + match[0].length);
-      const braceIndex = match[0].indexOf("{");
-
-      const foldClosingBrackets = config.foldClosingBrackets();
-
-      const collapsedText = this.getCollapsedText(match, startPosition, endPosition);
-
-      if (startPosition.line !== endPosition.line) {
+    for (const statement of body) {
+      if (statement.loc.end.line - statement.loc.start.line > 0) {
         ranges.push({
-          start: startPosition.line,
-          end: foldClosingBrackets ? endPosition.line : endPosition.line - 1,
-          startColumn: foldClosingBrackets ? braceIndex : undefined,
-          collapsedText,
+          start: statement.loc.start.line - 1,
+          end: statement.loc.end.line - 1,
+          startColumn: this.getStartColumn(statement, document),
+          collapsedText: this.getCollapsedText(statement, document),
         });
       }
     }
@@ -35,16 +33,63 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     return ranges;
   }
 
-  private getCollapsedText(match: RegExpExecArray, startPosition: Position, endPosition: Position) {
+  private getStartColumn(statement: ProgramStatement, document: TextDocument): number | undefined {
     const foldClosingBrackets = config.foldClosingBrackets();
 
+    if (foldClosingBrackets) {
+      const content = document.lineAt(statement.loc.start.line - 1).text;
+      const bracket = Object.keys(BRACKETS).find((openingBracket) => content.includes(openingBracket));
+      if (bracket) {
+        return content.indexOf(bracket);
+      }
+    }
+
+    return undefined;
+  }
+
+  private getCollapsedText(statement: ProgramStatement, document: TextDocument): string {
+    const foldClosingBrackets = config.foldClosingBrackets();
     const collapsedTextStrategy = config.collapsedTextStrategy();
 
     let collapsedText = "…";
+
     if (collapsedTextStrategy === "number of lines folded") {
-      collapsedText = ` ⋯ ${endPosition.line - startPosition.line - 1} lines ⋯ `;
+      collapsedText = this.getFoldedLinesCountCollapsedText(statement, document);
     }
 
-    return foldClosingBrackets ? `{${collapsedText}}` : collapsedText;
+    if (foldClosingBrackets) {
+      collapsedText = this.surroundWithBrackets(collapsedText, statement, document);
+    }
+
+    return collapsedText;
+  }
+
+  private surroundWithBrackets(collapsedText: string, statement: ProgramStatement, document: TextDocument): string {
+    const content = document.lineAt(statement.loc.start.line - 1).text;
+    let bracket: keyof typeof BRACKETS | undefined = undefined;
+    for (const openingBracket of Object.keys(BRACKETS)) {
+      if (content.includes(openingBracket)) {
+        bracket = openingBracket as keyof typeof BRACKETS;
+        break;
+      }
+    }
+
+    if (bracket) {
+      return `${bracket}${collapsedText}${BRACKETS[bracket]}`;
+    }
+    return collapsedText;
+  }
+
+  private getFoldedLinesCountCollapsedText(statement: ProgramStatement, document: TextDocument) {
+    let closingBracketInNewLine = false;
+    const lastLineContent = document.lineAt(statement.loc.end.line - 1).text;
+    for (const closingBracket in Object.values(BRACKETS)) {
+      if (lastLineContent[0] === closingBracket) {
+        closingBracketInNewLine = true;
+        break;
+      }
+    }
+    const linesCount = statement.loc.end.line - statement.loc.start.line - (closingBracketInNewLine ? 1 : 0);
+    return ` ⋯ ${linesCount} lines ⋯ `;
   }
 }
