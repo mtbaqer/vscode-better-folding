@@ -14,22 +14,47 @@ const BRACKETS = {
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(document: TextDocument): BetterFoldingRange[] {
-    const ranges: BetterFoldingRange[] = [];
+    const allFoldingRanges: BetterFoldingRange[] = [];
 
     const asTree = parser.parse(document.getText(), { loc: true, range: true });
     const { body } = asTree;
 
     for (const statement of body) {
-      if (statement.loc.end.line - statement.loc.start.line === 0) continue;
+      const foldingRanges: BetterFoldingRange[] = [];
+      this.getFoldingRangesFromStatement(foldingRanges, statement, document);
 
-      const range = this.getFoldingRange(statement, document);
-      ranges.push(range);
+      allFoldingRanges.push(...foldingRanges);
     }
 
-    return ranges;
+    return allFoldingRanges;
   }
 
-  private getFoldingRange(statement: ProgramStatement, document: TextDocument): BetterFoldingRange {
+  private getFoldingRangesFromStatement(
+    foldingRanges: BetterFoldingRange[],
+    statement: ProgramStatement,
+    document: TextDocument
+  ) {
+    if (statement.loc.end.line - statement.loc.start.line > 0) {
+      const range = this.toFoldingRange(statement, document);
+      foldingRanges.push(range);
+
+      const childrenStatements: ProgramStatement[] = [];
+      for (const child of Object.values(statement)) {
+        if (child?.loc) childrenStatements.push(child);
+        if (Array.isArray(child)) {
+          for (const grandChild of child) {
+            if (grandChild?.loc) childrenStatements.push(grandChild);
+          }
+        }
+      }
+
+      for (const childStatement of childrenStatements) {
+        this.getFoldingRangesFromStatement(foldingRanges, childStatement, document);
+      }
+    }
+  }
+
+  private toFoldingRange(statement: ProgramStatement, document: TextDocument): BetterFoldingRange {
     let startColumn = this.getStartColumn(statement, document);
     let collapsedText = this.getCollapsedText(statement, document);
 
