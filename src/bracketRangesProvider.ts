@@ -12,6 +12,7 @@ const BRACKETS = {
   "<": ">",
   "`": "`",
 };
+type Bracket = keyof typeof BRACKETS;
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(document: TextDocument): BetterFoldingRange[] {
@@ -21,7 +22,6 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     for (const node of asTree.body) {
       const foldingRanges: BetterFoldingRange[] = [];
       this.getFoldingRangesFromTreeNode(foldingRanges, node, document);
-
       allFoldingRanges.push(...foldingRanges);
     }
     return allFoldingRanges;
@@ -69,7 +69,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private findOpeningBracket(
     statement: ProgramStatement,
     document: TextDocument
-  ): [bracket: keyof typeof BRACKETS | undefined, line: number | undefined] {
+  ): [bracket: Bracket | undefined, line: number | undefined] {
     const startLine = statement.loc.start.line - 1;
     const endLine = statement.loc.end.line - 1;
     for (let i = startLine; i <= endLine; i++) {
@@ -80,7 +80,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
         if (Object.values(BRACKETS).includes(c)) stack.pop();
       }
       if (stack.length > 0) {
-        return [stack.pop() as keyof typeof BRACKETS, i];
+        return [stack.pop() as Bracket, i];
       }
     }
 
@@ -113,7 +113,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     return collapsedText;
   }
 
-  private surroundWithBrackets(bracket: keyof typeof BRACKETS, collapsedText: string): string {
+  private surroundWithBrackets(bracket: Bracket, collapsedText: string): string {
     return `${bracket}${collapsedText}${BRACKETS[bracket]}`;
   }
 
