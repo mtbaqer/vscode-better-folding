@@ -1,5 +1,6 @@
 import { TextDocument, Range } from "vscode";
 import { BetterFoldingRange } from "./types";
+import { ProgramStatement } from "@typescript-eslint/types/dist/generated/ast-spec";
 
 export function groupArrayToMap<T, V>(array: T[], getValue: (element: T) => V, defaultValue?: V): Map<V, T[]> {
   const map: Map<V, T[]> = new Map();
@@ -27,4 +28,8 @@ export function foldingRangeToRange(document: TextDocument): (foldingRange: Bett
       foldingRange.end,
       document.lineAt(foldingRange.end).text.length
     );
+}
+
+export function isStatement(node: any): node is ProgramStatement {
+  return Boolean(node) && node.hasOwnProperty("loc");
 }
