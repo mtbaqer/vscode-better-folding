@@ -16,21 +16,59 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(document: TextDocument): BetterFoldingRange[] {
     const ranges: BetterFoldingRange[] = [];
 
-    const asTree = parser.parse(document.getText(), { loc: true });
+    const asTree = parser.parse(document.getText(), { loc: true, range: true });
     const { body } = asTree;
 
     for (const statement of body) {
-      if (statement.loc.end.line - statement.loc.start.line > 0) {
-        ranges.push({
-          start: statement.loc.start.line - 1,
-          end: statement.loc.end.line - 1,
-          startColumn: this.getStartColumn(statement, document),
-          collapsedText: this.getCollapsedText(statement, document),
-        });
-      }
+      if (statement.loc.end.line - statement.loc.start.line === 0) continue;
+
+      const range = this.getFoldingRange(statement, document);
+      ranges.push(range);
     }
 
     return ranges;
+  }
+
+  private getFoldingRange(statement: ProgramStatement, document: TextDocument): BetterFoldingRange {
+    let startColumn = this.getStartColumn(statement, document);
+    let collapsedText = this.getCollapsedText(statement, document);
+
+    const foldClosingBrackets = config.foldClosingBrackets();
+    if (foldClosingBrackets) {
+      const [bracket, bracketLine] = this.findOpeningBracket(statement, document);
+
+      if (bracket) collapsedText = this.surroundWithBrackets(bracket, collapsedText);
+      if (bracketLine !== statement.loc.start.line - 1) startColumn = undefined;
+    }
+
+    return {
+      start: statement.loc.start.line - 1,
+      end: statement.loc.end.line - 1,
+      startColumn,
+      collapsedText,
+    };
+  }
+
+  //Find first opening bracket in statement that does not have a closing bracket in the same line.
+  private findOpeningBracket(
+    statement: ProgramStatement,
+    document: TextDocument
+  ): [bracket: keyof typeof BRACKETS | undefined, line: number | undefined] {
+    const startLine = statement.loc.start.line - 1;
+    const endLine = statement.loc.end.line - 1;
+    for (let i = startLine; i <= endLine; i++) {
+      const stack = [];
+      const lineText = document.lineAt(i).text;
+      for (const c of lineText) {
+        if (c in BRACKETS) stack.push(c);
+        if (Object.values(BRACKETS).includes(c)) stack.pop();
+      }
+      if (stack.length > 0) {
+        return [stack.pop() as keyof typeof BRACKETS, i];
+      }
+    }
+
+    return [undefined, undefined];
   }
 
   private getStartColumn(statement: ProgramStatement, document: TextDocument): number | undefined {
@@ -48,7 +86,6 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getCollapsedText(statement: ProgramStatement, document: TextDocument): string {
-    const foldClosingBrackets = config.foldClosingBrackets();
     const collapsedTextStrategy = config.collapsedTextStrategy();
 
     let collapsedText = "…";
@@ -57,27 +94,11 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       collapsedText = this.getFoldedLinesCountCollapsedText(statement, document);
     }
 
-    if (foldClosingBrackets) {
-      collapsedText = this.surroundWithBrackets(collapsedText, statement, document);
-    }
-
     return collapsedText;
   }
 
-  private surroundWithBrackets(collapsedText: string, statement: ProgramStatement, document: TextDocument): string {
-    const content = document.lineAt(statement.loc.start.line - 1).text;
-    let bracket: keyof typeof BRACKETS | undefined = undefined;
-    for (const openingBracket of Object.keys(BRACKETS)) {
-      if (content.includes(openingBracket)) {
-        bracket = openingBracket as keyof typeof BRACKETS;
-        break;
-      }
-    }
-
-    if (bracket) {
-      return `${bracket}${collapsedText}${BRACKETS[bracket]}`;
-    }
-    return collapsedText;
+  private surroundWithBrackets(bracket: keyof typeof BRACKETS, collapsedText: string): string {
+    return `${bracket}${collapsedText}${BRACKETS[bracket]}`;
   }
 
   private getFoldedLinesCountCollapsedText(statement: ProgramStatement, document: TextDocument) {
