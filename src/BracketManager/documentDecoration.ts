@@ -7,6 +7,7 @@ import Settings from "./settings";
 import TextLine from "./textLine";
 import { ignoreBracketsInToken, LineTokens } from "./vscodeFiles";
 import { TextDocumentContentChangeEvent } from "vscode";
+import Bracket from "./bracket";
 
 export default class DocumentDecoration {
   public readonly settings: Settings;
@@ -116,10 +117,11 @@ export default class DocumentDecoration {
       }
     }
 
-    // console.log("Coloring document");
-    // this.colorDecorations(editors);
-
-    // console.timeEnd("tokenizeDocument");
+    const brackets: Bracket[] = [];
+    for (const line of this.lines) {
+      brackets.push(...line.getAllBrackets());
+    }
+    return brackets;
   }
 
   private tokenizeLine(index: number) {

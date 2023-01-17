@@ -1,4 +1,5 @@
 import { TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window } from "vscode";
+import Bracket from "./bracket";
 import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
 
@@ -12,25 +13,27 @@ export default class DocumentDecorationManager {
     });
   }
 
-  public updateDocument(document: TextDocument) {
+  public async updateDocument(document: TextDocument): Promise<Bracket[] | undefined> {
     // console.log("updateDocument");
-    const documentDecoration = this.getDocumentDecorations(document);
+
+    const documentDecoration = await this.getDocumentDecorations(document);
     if (documentDecoration) {
-      documentDecoration.tokenizeDocument();
+      const brackets = documentDecoration.tokenizeDocument();
+      return brackets;
     }
   }
 
-  public onDidOpenTextDocument(document: TextDocument) {
+  public async onDidOpenTextDocument(document: TextDocument) {
     // console.log("onDidOpenTextDocument");
-    const documentDecoration = this.getDocumentDecorations(document);
+    const documentDecoration = await this.getDocumentDecorations(document);
     if (documentDecoration) {
       documentDecoration.tokenizeDocument();
     }
   }
 
-  public onDidChangeTextDocument(event: TextDocumentChangeEvent) {
+  public async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
     // console.log("onDidChangeTextDocument");
-    const documentDecoration = this.getDocumentDecorations(event.document);
+    const documentDecoration = await this.getDocumentDecorations(event.document);
     if (documentDecoration) {
       documentDecoration.onDidChangeTextDocument(event.contentChanges);
     }
@@ -54,7 +57,7 @@ export default class DocumentDecorationManager {
     }
   }
 
-  private getDocumentDecorations(document: TextDocument): DocumentDecoration | undefined {
+  private async getDocumentDecorations(document: TextDocument): Promise<DocumentDecoration | undefined> {
     if (!this.isValidDocument(document)) {
       return;
     }
@@ -72,12 +75,11 @@ export default class DocumentDecorationManager {
 
       if (languageConfig instanceof Promise) {
         // console.log("Found Tokenizer promise for " + document.languageId);
-        languageConfig.then((grammar) => {
+        return languageConfig.then(async (grammar) => {
           if (grammar) {
-            this.updateDocument(document);
+            return this.getDocumentDecorations(document);
           }
         });
-        return;
       }
 
       // console.log("Found Tokenizer for " + document.languageId);
