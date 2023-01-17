@@ -1,7 +1,6 @@
 import { Position } from "vscode";
 import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
-import ColorMode from "./colorMode";
 import IBracketManager from "./IBracketManager";
 import LanguageConfig from "./languageConfig";
 import MultipleBracketGroups from "./multipleIndexes";
@@ -30,16 +29,7 @@ export default class LineState {
       this.bracketManager = previousState.colorIndexes;
       this.previousBracketColor = previousState.previousBracketColor;
     } else {
-      switch (settings.colorMode) {
-        case ColorMode.Consecutive:
-          this.bracketManager = new SingularBracketGroup(settings);
-          break;
-        case ColorMode.Independent:
-          this.bracketManager = new MultipleBracketGroups(settings, languageConfig);
-          break;
-        default:
-          throw new RangeError("Not implemented enum value");
-      }
+      this.bracketManager = new SingularBracketGroup(settings);
     }
   }
 

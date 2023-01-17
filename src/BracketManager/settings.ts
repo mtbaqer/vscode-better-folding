@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import ColorMode from "./colorMode";
 import GutterIconManager from "./gutterIconManager";
 import TextMateLoader from "./textMateLoader";
 import { ThemeColor } from "vscode";
@@ -7,7 +6,6 @@ import { ThemeColor } from "vscode";
 export default class Settings {
   public readonly TextMateLoader = new TextMateLoader();
   public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
-  public readonly colorMode: ColorMode;
   public readonly contextualParsing: boolean;
   public readonly forceIterationColorCycle: boolean;
   public readonly forceUniqueOpeningColor: boolean;
@@ -120,12 +118,6 @@ export default class Settings {
 
     if (typeof this.forceIterationColorCycle !== "boolean") {
       throw new Error("forceIterationColorCycle is not a boolean");
-    }
-
-    this.colorMode = (ColorMode as any)[configuration.get("colorMode") as string];
-
-    if (typeof this.colorMode !== "number") {
-      throw new Error("colorMode enum could not be parsed");
     }
 
     this.colors = configuration.get("colors") as string[];
