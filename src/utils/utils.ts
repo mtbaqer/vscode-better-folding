@@ -1,6 +1,5 @@
-import { TextDocument, Range, Position } from "vscode";
+import { TextDocument, Range } from "vscode";
 import { BetterFoldingRange } from "../types";
-import { ProgramStatement } from "@typescript-eslint/types/dist/generated/ast-spec";
 import Bracket from "../BracketManager/bracket";
 import BracketClose from "../BracketManager/bracketClose";
 import BracketsRange from "./classes/bracketsRange";
@@ -31,10 +30,6 @@ export function foldingRangeToRange(document: TextDocument): (foldingRange: Bett
       foldingRange.end,
       document.lineAt(foldingRange.end).text.length
     );
-}
-
-export function isStatement(node: any): node is ProgramStatement {
-  return Boolean(node) && node.hasOwnProperty("loc");
 }
 
 export function bracketsToBracketsRanges(brackets: Bracket[], sortBy: "end" | "start" = "end"): BracketsRange[] {
