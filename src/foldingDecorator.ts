@@ -68,7 +68,7 @@ export default class FoldingDecorator extends Disposable {
 
     const providers = this.providers[document.languageId] ?? [];
     for (const provider of providers) {
-      const providerRanges = await provider.provideFoldingRanges(document);
+      const providerRanges = await provider.provideFoldingRanges(document, undefined, undefined, true);
       ranges.push(...providerRanges);
     }
 

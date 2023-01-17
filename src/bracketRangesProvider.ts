@@ -1,4 +1,4 @@
-import { TextDocument } from "vscode";
+import { CancellationToken, FoldingContext, TextDocument } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
 import { bracketsToBracketsRanges } from "./utils/utils";
@@ -8,10 +8,20 @@ import ExtendedMap from "./utils/classes/extendedMap";
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private document: TextDocument = null!; //TODO: Make this type safe
+  private foldingRanges: BetterFoldingRange[] = [];
   private positionToFoldingRange: ExtendedMap<[line: number, column: number], BetterFoldingRange> = new ExtendedMap();
 
-  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
+  public async provideFoldingRanges(
+    document: TextDocument,
+    context?: FoldingContext,
+    token?: CancellationToken,
+    useCachedRanges = false
+  ): Promise<BetterFoldingRange[]> {
     this.document = document;
+
+    if (useCachedRanges) {
+      return this.foldingRanges;
+    }
 
     const bracketsManager = new BracketsManager();
     const allBrackets = await bracketsManager.updateDocument(document);
@@ -20,6 +30,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     const bracketsRanges = bracketsToBracketsRanges(allBrackets);
     const foldingRanges = this.bracketsRangesToFoldingRanges(bracketsRanges);
 
+    this.foldingRanges = foldingRanges;
     return foldingRanges;
   }
 
