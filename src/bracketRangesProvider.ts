@@ -80,8 +80,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getFoldedLinesCountCollapsedText(bracketsRange: BracketsRange): string {
-    const linesCount = bracketsRange.end.line - bracketsRange.start.line;
-    //TODO: check if closing bracket is by itself on the last line and -1 if so.
+    const linesCount = bracketsRange.end.line - bracketsRange.start.line - 1;
     return ` ⋯ ${linesCount} lines ⋯ `;
   }
 
