@@ -89,21 +89,23 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     bracketsRange: BracketsRange,
     initialCollapsedText: string
   ): [start: number, end: number, collapsedText: string] {
+    let end = bracketsRange.end.line;
     let collapsedText = initialCollapsedText;
-    let line = bracketsRange.end.line;
-    let column = bracketsRange.end.character;
-    let lineContent = this.document.lineAt(line).text;
 
-    while (column < lineContent.length) {
+    const line = bracketsRange.end.line;
+    const lineContent = this.document.lineAt(line).text;
+
+    for (let column = bracketsRange.end.character; column < lineContent.length; column++) {
       const foldingRange = this.positionToFoldingRange.get([line, column]);
-      if (foldingRange) {
-        break;
-      } else {
+      if (!foldingRange) {
         collapsedText += lineContent[column];
-        column++;
+        continue;
       }
+
+      end = foldingRange.end;
+      collapsedText += foldingRange.collapsedText;
     }
 
-    return [bracketsRange.start.line, line, collapsedText];
+    return [bracketsRange.start.line, end, collapsedText];
   }
 }
