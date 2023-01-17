@@ -5,11 +5,8 @@ import { ThemeColor } from "vscode";
 export default class Settings {
   public readonly TextMateLoader = new TextMateLoader();
   public readonly bracketDecorations: Map<string, vscode.TextEditorDecorationType>;
-  public readonly contextualParsing: boolean;
   public readonly forceIterationColorCycle: boolean;
   public readonly forceUniqueOpeningColor: boolean;
-  public readonly regexNonExact: RegExp;
-  public readonly timeOutLength: number;
   public readonly highlightActiveScope: boolean;
   public readonly showVerticalScopeLine: boolean;
   public readonly showHorizontalScopeLine: boolean;
@@ -25,8 +22,6 @@ export default class Settings {
   private readonly activeScopeLineCSSBorder: string;
   private readonly rulerPosition: string;
   constructor() {
-    const workspaceColors = vscode.workspace.getConfiguration("workbench.colorCustomizations", undefined);
-
     const configuration = vscode.workspace.getConfiguration("bracket-pair-colorizer-2", undefined);
     const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
 
