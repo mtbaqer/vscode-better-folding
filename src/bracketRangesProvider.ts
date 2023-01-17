@@ -25,6 +25,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
 
   private bracketsRangesToFoldingRanges(bracketsRanges: BracketsRange[]): BetterFoldingRange[] {
     this.positionToFoldingRange.clear();
+
     const foldingRanges: BetterFoldingRange[] = [];
     for (const bracketsRange of bracketsRanges) {
       if (bracketsRange.start.line === bracketsRange.end.line) continue;
