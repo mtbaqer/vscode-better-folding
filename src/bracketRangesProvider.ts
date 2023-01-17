@@ -1,4 +1,4 @@
-import { TextDocument } from "vscode";
+import { Position, TextDocument } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
 import * as parser from "@typescript-eslint/typescript-estree";
@@ -45,16 +45,16 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private toFoldingRange(statement: ProgramStatement, document: TextDocument): BetterFoldingRange {
-    let startColumn = this.getStartColumn(statement, document);
-    let collapsedText = this.getCollapsedText(statement, document);
+    let bracket: Bracket | undefined = undefined;
+    let bracketPosition: Position | undefined = undefined;
 
     const foldClosingBrackets = config.foldClosingBrackets();
     if (foldClosingBrackets) {
-      const [bracket, bracketLine] = this.findOpeningBracket(statement, document);
-
-      if (bracket) collapsedText = this.surroundWithBrackets(bracket, collapsedText);
-      if (bracketLine !== statement.loc.start.line - 1) startColumn = undefined;
+      [bracket, bracketPosition] = this.findOpeningBracket(statement, document);
     }
+
+    const startColumn = this.getStartColumn(statement, bracketPosition);
+    const collapsedText = this.getCollapsedText(statement, document, bracket);
 
     return {
       start: statement.loc.start.line - 1,
@@ -69,45 +69,42 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private findOpeningBracket(
     statement: ProgramStatement,
     document: TextDocument
-  ): [bracket: Bracket | undefined, line: number | undefined] {
+  ): [bracket: Bracket | undefined, position: Position | undefined] {
     const startLine = statement.loc.start.line - 1;
     const endLine = statement.loc.end.line - 1;
-    for (let i = startLine; i <= endLine; i++) {
-      const stack = [];
-      const lineText = document.lineAt(i).text;
-      for (const c of lineText) {
-        if (c in BRACKETS) stack.push(c);
-        if (Object.values(BRACKETS).includes(c)) stack.pop();
+    for (let line = startLine; line <= endLine; line++) {
+      const stack: [string, number][] = [];
+      const lineText = document.lineAt(line).text;
+      for (let column = 0; column < lineText.length; column++) {
+        const character = lineText[column];
+        if (character in BRACKETS) stack.push([character, column]);
+        if (Object.values(BRACKETS).includes(character)) stack.pop();
       }
       if (stack.length > 0) {
-        return [stack.pop() as Bracket, i];
+        const [bracket, column] = stack.pop()!;
+        return [bracket as Bracket, new Position(line, column)];
       }
     }
 
     return [undefined, undefined];
   }
 
-  private getStartColumn(statement: ProgramStatement, document: TextDocument): number | undefined {
-    const foldClosingBrackets = config.foldClosingBrackets();
-
-    if (foldClosingBrackets) {
-      const content = document.lineAt(statement.loc.start.line - 1).text;
-      const bracket = Object.keys(BRACKETS).find((openingBracket) => content.includes(openingBracket));
-      if (bracket) {
-        return content.indexOf(bracket);
-      }
-    }
-
-    return undefined;
+  private getStartColumn(statement: ProgramStatement, bracketPosition: Position | undefined): number | undefined {
+    if (!bracketPosition || bracketPosition.line !== statement.loc.start.line - 1) return undefined;
+    return bracketPosition.character;
   }
 
-  private getCollapsedText(statement: ProgramStatement, document: TextDocument): string {
+  private getCollapsedText(statement: ProgramStatement, document: TextDocument, bracket: Bracket | undefined): string {
     const collapsedTextStrategy = config.collapsedTextStrategy();
 
     let collapsedText = "…";
 
     if (collapsedTextStrategy === "number of lines folded") {
       collapsedText = this.getFoldedLinesCountCollapsedText(statement, document);
+    }
+
+    if (bracket) {
+      collapsedText = this.surroundWithBrackets(bracket, collapsedText);
     }
 
     return collapsedText;
