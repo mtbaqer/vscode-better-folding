@@ -9,7 +9,6 @@ import Token from "./token";
 
 export default class LineState {
   private readonly bracketManager: IBracketManager;
-  private previousBracketColor: string;
   private readonly settings: Settings;
   private readonly languageConfig: LanguageConfig;
 
@@ -18,7 +17,6 @@ export default class LineState {
     languageConfig: LanguageConfig,
     previousState?: {
       readonly colorIndexes: IBracketManager;
-      readonly previousBracketColor: string;
     }
   ) {
     this.settings = settings;
@@ -26,7 +24,6 @@ export default class LineState {
 
     if (previousState !== undefined) {
       this.bracketManager = previousState.colorIndexes;
-      this.previousBracketColor = previousState.previousBracketColor;
     } else {
       this.bracketManager = new SingularBracketGroup(settings);
     }
@@ -39,7 +36,6 @@ export default class LineState {
   public cloneState(): LineState {
     const clone = {
       colorIndexes: this.bracketManager.copyCumulativeState(),
-      previousBracketColor: this.previousBracketColor,
     };
 
     return new LineState(this.settings, this.languageConfig, clone);
@@ -69,21 +65,7 @@ export default class LineState {
   private addOpenBracket(token: Token) {
     let colorIndex: number;
 
-    if (this.settings.forceIterationColorCycle) {
-      colorIndex = (this.bracketManager.getPreviousIndex(token.type) + 1) % this.settings.colors.length;
-    } else {
-      colorIndex = this.bracketManager.GetAmountOfOpenBrackets(token.type) % this.settings.colors.length;
-    }
-
-    let color = this.settings.colors[colorIndex];
-
-    if (this.settings.forceUniqueOpeningColor && color === this.previousBracketColor) {
-      colorIndex = (colorIndex + 1) % this.settings.colors.length;
-      color = this.settings.colors[colorIndex];
-    }
-
-    this.previousBracketColor = color;
-    this.bracketManager.addOpenBracket(token, colorIndex);
+    this.bracketManager.addOpenBracket(token);
   }
 
   private addCloseBracket(token: Token) {

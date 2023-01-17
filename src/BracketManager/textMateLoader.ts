@@ -38,7 +38,7 @@ export class TextMateLoader {
       return;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<[string[]]>((resolve, reject) => {
       fs.readFile(configPath, (error, content) => {
         if (error) {
           reject(error);

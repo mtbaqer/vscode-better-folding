@@ -65,8 +65,6 @@ export interface IViewLineTokens {
 }
 
 export class LineTokens implements IViewLineTokens {
-  _lineTokensBrand: void;
-
   private readonly _tokens: Uint32Array;
   private readonly _tokensCount: number;
   private readonly _text: string;

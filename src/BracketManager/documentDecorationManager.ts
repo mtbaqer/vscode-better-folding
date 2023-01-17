@@ -10,21 +10,6 @@ export default class DocumentDecorationManager {
     this.documents.forEach((document, key) => {
       document.dispose();
     });
-    this.settings.dispose();
-  }
-
-  public expandBracketSelection(editor: TextEditor) {
-    const documentDecoration = this.getDocumentDecorations(editor.document);
-    if (documentDecoration) {
-      documentDecoration.expandBracketSelection(editor);
-    }
-  }
-
-  public undoBracketSelection(editor: TextEditor) {
-    const documentDecoration = this.getDocumentDecorations(editor.document);
-    if (documentDecoration) {
-      documentDecoration.undoBracketSelection(editor);
-    }
   }
 
   public updateDocument(document: TextDocument) {
@@ -59,20 +44,6 @@ export default class DocumentDecorationManager {
       // console.log("Disposing " + uri);
       document.dispose();
       this.documents.delete(uri);
-    }
-  }
-
-  public onDidChangeSelection(event: TextEditorSelectionChangeEvent) {
-    // console.log("onDidChangeSelection");
-    const documentDecoration = this.getDocumentDecorations(event.textEditor.document);
-    if (
-      documentDecoration &&
-      (documentDecoration.settings.highlightActiveScope ||
-        documentDecoration.settings.showBracketsInGutter ||
-        documentDecoration.settings.showVerticalScopeLine ||
-        documentDecoration.settings.showHorizontalScopeLine)
-    ) {
-      documentDecoration.updateScopeDecorations(event);
     }
   }
 

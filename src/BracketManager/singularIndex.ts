@@ -9,38 +9,30 @@ export default class SingularBracketGroup implements IBracketManager {
   private allLinesOpenBracketStack: Bracket[] = [];
   private allBracketsOnLine: Bracket[] = [];
   private bracketsHash = "";
-  private previousOpenBracketColorIndex: number = -1;
   private readonly settings: Settings;
 
   constructor(
     settings: Settings,
     previousState?: {
       currentOpenBracketColorIndexes: Bracket[];
-      previousOpenBracketColorIndex: number;
     }
   ) {
     this.settings = settings;
 
     if (previousState !== undefined) {
       this.allLinesOpenBracketStack = previousState.currentOpenBracketColorIndexes;
-      this.previousOpenBracketColorIndex = previousState.previousOpenBracketColorIndex;
     }
-  }
-
-  public getPreviousIndex(type: number): number {
-    return this.previousOpenBracketColorIndex;
   }
 
   public getAllBrackets(): Bracket[] {
     return this.allBracketsOnLine;
   }
 
-  public addOpenBracket(token: Token, colorIndex: number) {
-    const openBracket = new Bracket(token, this.settings.colors[colorIndex]);
+  public addOpenBracket(token: Token) {
+    const openBracket = new Bracket(token);
     this.allLinesOpenBracketStack.push(openBracket);
     this.allBracketsOnLine.push(openBracket);
     this.bracketsHash += openBracket.token.character;
-    this.previousOpenBracketColorIndex = colorIndex;
   }
 
   public GetAmountOfOpenBrackets(type: number): number {
@@ -58,7 +50,7 @@ export default class SingularBracketGroup implements IBracketManager {
       }
     }
 
-    const orphan = new Bracket(token, this.settings.unmatchedScopeColor);
+    const orphan = new Bracket(token);
     this.allBracketsOnLine.push(orphan);
     this.bracketsHash += orphan.token.character;
   }
@@ -97,7 +89,6 @@ export default class SingularBracketGroup implements IBracketManager {
   public copyCumulativeState() {
     return new SingularBracketGroup(this.settings, {
       currentOpenBracketColorIndexes: this.allLinesOpenBracketStack.slice(),
-      previousOpenBracketColorIndex: this.previousOpenBracketColorIndex,
     });
   }
 }

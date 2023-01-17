@@ -4,8 +4,7 @@ import BracketClose from "./bracketClose";
 import Token from "./token";
 
 interface IBracketManager {
-  getPreviousIndex(type: number): number;
-  addOpenBracket(token: Token, color: number): void;
+  addOpenBracket(token: Token): void;
   GetAmountOfOpenBrackets(type: number): number;
   addCloseBracket(token: Token): void;
   getClosingBracket(position: Position): BracketClose | undefined;
