@@ -3,7 +3,6 @@ import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
 import IBracketManager from "./IBracketManager";
 import LanguageConfig from "./languageConfig";
-import MultipleBracketGroups from "./multipleIndexes";
 import Settings from "./settings";
 import SingularBracketGroup from "./singularIndex";
 import Token from "./token";
