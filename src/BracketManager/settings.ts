@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import GutterIconManager from "./gutterIconManager";
 import TextMateLoader from "./textMateLoader";
 import { ThemeColor } from "vscode";
 
@@ -21,14 +20,12 @@ export default class Settings {
   public readonly unmatchedScopeColor: string;
   public readonly excludedLanguages: Set<string>;
   public isDisposed = false;
-  private readonly gutterIcons: GutterIconManager;
   private readonly activeBracketCSSElements: string[][];
   private readonly activeScopeLineCSSElements: string[][];
   private readonly activeScopeLineCSSBorder: string;
   private readonly rulerPosition: string;
   constructor() {
     const workspaceColors = vscode.workspace.getConfiguration("workbench.colorCustomizations", undefined);
-    this.gutterIcons = new GutterIconManager();
 
     const configuration = vscode.workspace.getConfiguration("bracket-pair-colorizer-2", undefined);
     const activeScopeCSS = configuration.get("activeScopeCSS") as string[];
@@ -142,18 +139,8 @@ export default class Settings {
         decoration.dispose();
       });
       this.bracketDecorations.clear();
-      this.gutterIcons.Dispose();
       this.isDisposed = true;
     }
-  }
-
-  public createGutterBracketDecorations(color: string, bracket: string) {
-    const gutterIcon = this.gutterIcons.GetIconUri(bracket, color);
-    const decorationSettings: vscode.DecorationRenderOptions = {
-      gutterIconPath: gutterIcon,
-    };
-    const decoration = vscode.window.createTextEditorDecorationType(decorationSettings);
-    return decoration;
   }
 
   public createRulerBracketDecorations(color: string) {

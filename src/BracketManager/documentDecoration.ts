@@ -186,30 +186,6 @@ export default class DocumentDecoration {
       this.scopeDecorations.push(decoration);
     }
 
-    if (this.settings.showBracketsInGutter) {
-      if (startLineIndex === endLineIndex) {
-        const decoration = this.settings.createGutterBracketDecorations(
-          closeBracket.color,
-          openBracket.token.character + closeBracket.token.character
-        );
-        event.textEditor.setDecorations(decoration, [beginRange, endRange]);
-        this.scopeDecorations.push(decoration);
-      } else {
-        const decorationOpen = this.settings.createGutterBracketDecorations(
-          openBracket.color,
-          openBracket.token.character
-        );
-        event.textEditor.setDecorations(decorationOpen, [beginRange]);
-        this.scopeDecorations.push(decorationOpen);
-        const decorationClose = this.settings.createGutterBracketDecorations(
-          closeBracket.color,
-          closeBracket.token.character
-        );
-        event.textEditor.setDecorations(decorationClose, [endRange]);
-        this.scopeDecorations.push(decorationClose);
-      }
-    }
-
     if (this.settings.showBracketsInRuler) {
       const decoration = this.settings.createRulerBracketDecorations(closeBracket.color);
       event.textEditor.setDecorations(decoration, [beginRange, endRange]);
