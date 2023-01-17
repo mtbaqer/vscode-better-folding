@@ -1,5 +1,5 @@
 import { ExtensionContext, languages, window } from "vscode";
-import DocumentDecorationManager from "./BracketManager/documentDecorationManager";
+import BracketsManager from "./BracketManager/bracketsManager";
 import { BracketRangesProvider } from "./bracketRangesProvider";
 import FoldingDecorator from "./foldingDecorator";
 

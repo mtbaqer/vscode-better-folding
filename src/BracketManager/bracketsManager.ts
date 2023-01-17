@@ -3,7 +3,7 @@ import Bracket from "./bracket";
 import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
 
-export default class DocumentDecorationManager {
+export default class BracketsManager {
   private readonly documents = new Map<string, DocumentDecoration>();
   private readonly settings = new Settings();
 
