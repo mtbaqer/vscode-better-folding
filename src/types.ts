@@ -12,6 +12,7 @@ export interface BetterFoldingRangeProvider {
   provideFoldingRanges(
     document: TextDocument,
     context?: FoldingContext,
-    token?: CancellationToken
+    token?: CancellationToken,
+    useCachedRanges?: boolean
   ): Promise<BetterFoldingRange[]>;
 }
