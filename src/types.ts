@@ -13,5 +13,5 @@ export interface BetterFoldingRangeProvider {
     document: TextDocument,
     context?: FoldingContext,
     token?: CancellationToken
-  ): BetterFoldingRange[];
+  ): Promise<BetterFoldingRange[]>;
 }

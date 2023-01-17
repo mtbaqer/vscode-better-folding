@@ -1,6 +1,9 @@
-import { TextDocument, Range } from "vscode";
-import { BetterFoldingRange } from "./types";
+import { TextDocument, Range, Position } from "vscode";
+import { BetterFoldingRange } from "../types";
 import { ProgramStatement } from "@typescript-eslint/types/dist/generated/ast-spec";
+import Bracket from "../BracketManager/bracket";
+import BracketClose from "../BracketManager/bracketClose";
+import BracketsRange from "./classes/bracketsRange";
 
 export function groupArrayToMap<T, V>(array: T[], getValue: (element: T) => V, defaultValue?: V): Map<V, T[]> {
   const map: Map<V, T[]> = new Map();
@@ -32,4 +35,19 @@ export function foldingRangeToRange(document: TextDocument): (foldingRange: Bett
 
 export function isStatement(node: any): node is ProgramStatement {
   return Boolean(node) && node.hasOwnProperty("loc");
+}
+
+export function bracketsToBracketsRanges(brackets: Bracket[], sortBy: "end" | "start" = "end"): BracketsRange[] {
+  const ranges: BracketsRange[] = [];
+  for (let i = brackets.length - 1; i >= 0; i--) {
+    const bracket = brackets[i];
+    if (bracket instanceof BracketClose) {
+      const openBracket = bracket.openBracket;
+      if (openBracket) {
+        const bracketsRange = new BracketsRange(openBracket, bracket);
+        ranges.push(bracketsRange);
+      }
+    }
+  }
+  return sortBy === "end" ? ranges : ranges.reverse();
 }

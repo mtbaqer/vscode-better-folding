@@ -8,7 +8,7 @@ import {
   window,
 } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
-import { foldingRangeToRange, groupArrayToMap } from "./utils";
+import { foldingRangeToRange, groupArrayToMap } from "./utils/utils";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
@@ -48,12 +48,12 @@ export default class FoldingDecorator extends Disposable {
     }
   }
 
-  private updateDecorations(activeEditor: TextEditor) {
+  private async updateDecorations(activeEditor: TextEditor) {
     this.clearDecorations();
 
     this.cacheFoldedLines(activeEditor.visibleRanges);
 
-    const foldingRanges = this.getRanges(activeEditor.document);
+    const foldingRanges = await this.getRanges(activeEditor.document);
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
     this.decorations = this.applyDecorations(activeEditor, foldingRanges, decorationOptions);
   }
@@ -63,12 +63,12 @@ export default class FoldingDecorator extends Disposable {
     this.unfoldedDecoration.dispose();
   }
 
-  private getRanges(document: TextDocument): BetterFoldingRange[] {
+  private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
     const ranges: BetterFoldingRange[] = [];
 
     const providers = this.providers[document.languageId] ?? [];
     for (const provider of providers) {
-      const providerRanges = provider.provideFoldingRanges(document);
+      const providerRanges = await provider.provideFoldingRanges(document);
       ranges.push(...providerRanges);
     }
 
