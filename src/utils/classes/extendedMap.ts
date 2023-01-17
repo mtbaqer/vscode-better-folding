@@ -13,4 +13,8 @@ export default class ExtendedMap<K extends Object, V> {
     this.map.set(key.toString(), value);
     return this;
   }
+
+  clear(): void {
+    this.map.clear();
+  }
 }
