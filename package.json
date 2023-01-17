@@ -23,16 +23,16 @@
           "default": true,
           "markdownDescription": "Include closing brackets like `}` and `]` in the folding range."
         },
-        "better-folding.collapsedTextContent": {
+        "better-folding.collapsedTextStrategy": {
           "type": "string",
           "default": "ellipsis",
           "enum": [
             "ellipsis",
-            "number of lines folded"
+            "count body lines"
           ],
-          "enumDescriptions": [
-            "… (ellipsis) character. Example: {…}.",
-            "Example: { ⋯ 3 lines ⋯ }."
+          "markdownEnumDescriptions": [
+            "`…` (ellipsis) character. Example: `{…}`.",
+            "Counts the number of lines folded, excluding the closing bracket line. Example: `{ ⋯ 2 lines ⋯ }`."
           ]
         }
       }

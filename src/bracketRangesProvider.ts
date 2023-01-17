@@ -66,7 +66,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     let collapsedText = "…";
 
     const collapsedTextStrategy = config.collapsedTextStrategy();
-    if (collapsedTextStrategy === "number of lines folded") {
+    if (collapsedTextStrategy === "count body lines") {
       collapsedText = this.getFoldedLinesCountCollapsedText(bracketsRange);
     }
 

@@ -6,7 +6,7 @@ export function foldClosingBrackets() {
   return workspace.getConfiguration(EXTENSION_ID).get<boolean>("foldClosingBrackets") ?? false;
 }
 
-type CollapsedTextStrategy = "ellipsis" | "number of lines folded";
+type CollapsedTextStrategy = "ellipsis" | "count body lines";
 export function collapsedTextStrategy() {
-  return workspace.getConfiguration(EXTENSION_ID).get<CollapsedTextStrategy>("collapsedTextContent") ?? "ellipsis";
+  return workspace.getConfiguration(EXTENSION_ID).get<CollapsedTextStrategy>("collapsedTextStrategy") ?? "ellipsis";
 }
