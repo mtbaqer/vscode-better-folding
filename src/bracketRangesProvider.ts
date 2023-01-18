@@ -8,7 +8,7 @@ import ExtendedMap from "./utils/classes/extendedMap";
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private document: TextDocument = null!; //TODO: Make this type safe
-  private foldingRanges: BetterFoldingRange[] = [];
+  private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
   private positionToFoldingRange: ExtendedMap<[line: number, column: number], BetterFoldingRange> = new ExtendedMap();
 
   public async provideFoldingRanges(
@@ -17,12 +17,16 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     token?: CancellationToken,
     useCachedRanges = false
   ): Promise<BetterFoldingRange[]> {
-    this.document = document;
-
     if (useCachedRanges) {
       return this.foldingRanges;
     }
 
+    this.foldingRanges = this.updateFoldingRanges(document);
+    return this.foldingRanges;
+  }
+
+  private async updateFoldingRanges(document: TextDocument) {
+    this.document = document;
     const bracketsManager = new BracketsManager();
     const allBrackets = await bracketsManager.updateDocument(document);
     if (!allBrackets) return [];
@@ -30,7 +34,6 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     const bracketsRanges = bracketsToBracketsRanges(allBrackets);
     const foldingRanges = this.bracketsRangesToFoldingRanges(bracketsRanges);
 
-    this.foldingRanges = foldingRanges;
     return foldingRanges;
   }
 

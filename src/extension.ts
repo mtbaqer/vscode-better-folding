@@ -1,26 +1,26 @@
-import { ExtensionContext, languages, window } from "vscode";
+import { ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./bracketRangesProvider";
 import FoldingDecorator from "./foldingDecorator";
 
 export function activate(context: ExtensionContext) {
   const foldingDecorator = new FoldingDecorator();
   context.subscriptions.push(foldingDecorator);
+  const bracketRangesProvider = new BracketRangesProvider();
 
   // Courtesy of vscode-explicit-fold,
   // apparently if you delay the folding provider by a second, it can override the default language folding provider.
   setTimeout(() => {
-    const bracketRangesProvider = new BracketRangesProvider();
     context.subscriptions.push(languages.registerFoldingRangeProvider("typescript", bracketRangesProvider));
     foldingDecorator.registerFoldingRangeProvider("typescript", bracketRangesProvider);
   }, 1000);
 
   context.subscriptions.push(
+    workspace.onDidChangeTextDocument((e) => {
+      if (e) bracketRangesProvider.provideFoldingRanges(e.document);
+    }),
     window.onDidChangeTextEditorVisibleRanges((e) => {
       if (e) foldingDecorator.triggerUpdateDecorations();
-    })
-  );
-
-  context.subscriptions.push(
+    }),
     window.onDidChangeActiveTextEditor((e) => {
       // This is a hack to get around the fact that visible ranges are cleared when the document is changed,
       // even when some ranges are folded.

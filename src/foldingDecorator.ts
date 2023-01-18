@@ -49,11 +49,11 @@ export default class FoldingDecorator extends Disposable {
   }
 
   private async updateDecorations(activeEditor: TextEditor) {
-    this.clearDecorations();
-
     this.cacheFoldedLines(activeEditor.visibleRanges);
 
     const foldingRanges = await this.getRanges(activeEditor.document);
+    this.clearDecorations();
+
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
     this.decorations = this.applyDecorations(activeEditor, foldingRanges, decorationOptions);
   }
