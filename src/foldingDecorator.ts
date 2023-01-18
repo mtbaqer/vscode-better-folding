@@ -35,16 +35,8 @@ export default class FoldingDecorator extends Disposable {
   }
 
   public triggerUpdateDecorations(editor?: TextEditor) {
-    if (window.visibleTextEditors.length === 0) return;
-
     if (!this.timeout) {
-      if (editor) {
-        this.updateDecorations(editor);
-      } else {
-        for (const editor of window.visibleTextEditors) {
-          this.updateDecorations(editor);
-        }
-      }
+      this.updateDecorations(editor);
 
       this.timeout = setTimeout(() => {
         clearTimeout(this.timeout);
@@ -53,7 +45,16 @@ export default class FoldingDecorator extends Disposable {
     }
   }
 
-  private async updateDecorations(editor: TextEditor) {
+  private updateDecorations(editor?: TextEditor) {
+    if (editor) this.updateEditorDecorations(editor);
+    else {
+      for (const editor of window.visibleTextEditors) {
+        this.updateEditorDecorations(editor);
+      }
+    }
+  }
+
+  private async updateEditorDecorations(editor: TextEditor) {
     this.cacheFoldedLines(editor.visibleRanges, editor);
 
     const foldingRanges = await this.getRanges(editor.document);

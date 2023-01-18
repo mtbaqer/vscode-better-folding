@@ -22,7 +22,7 @@ export function activate(context: ExtensionContext) {
       if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
     }),
     window.onDidChangeTextEditorVisibleRanges((e) => {
-      if (e) foldingDecorator.triggerUpdateDecorations(e.textEditor);
+      foldingDecorator.triggerUpdateDecorations(e.textEditor);
     })
   );
 
