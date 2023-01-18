@@ -10,6 +10,11 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private document: TextDocument = null!; //TODO: Make this type safe
   private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
   private positionToFoldingRange: ExtendedMap<[line: number, column: number], BetterFoldingRange> = new ExtendedMap();
+  private bracketsManager: BracketsManager = new BracketsManager();
+
+  constructor() {
+    this.bracketsManager.updateAllDocuments();
+  }
 
   public async provideFoldingRanges(
     document: TextDocument,
@@ -27,8 +32,8 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
 
   private async updateFoldingRanges(document: TextDocument) {
     this.document = document;
-    const bracketsManager = new BracketsManager();
-    const allBrackets = await bracketsManager.updateDocument(document);
+    const allBrackets = await this.bracketsManager.updateDocument(document);
+
     if (!allBrackets) return [];
 
     const bracketsRanges = bracketsToBracketsRanges(allBrackets);

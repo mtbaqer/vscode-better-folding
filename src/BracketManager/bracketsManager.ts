@@ -18,8 +18,7 @@ export default class BracketsManager {
 
     const documentDecoration = await this.getDocumentDecorations(document);
     if (documentDecoration) {
-      const brackets = documentDecoration.tokenizeDocument();
-      return brackets;
+      return documentDecoration.tokenizeDocument();
     }
   }
 
@@ -66,28 +65,28 @@ export default class BracketsManager {
     // console.log("Looking for " + uri + " from cache");
     let documentDecorations = this.documents.get(uri);
 
-    if (documentDecorations === undefined) {
-      const languageConfig = this.tryGetLanguageConfig(document.languageId);
-      if (!languageConfig) {
-        // console.log("Could not find tokenizer for " + document.languageId);
-        return;
-      }
-
-      if (languageConfig instanceof Promise) {
-        // console.log("Found Tokenizer promise for " + document.languageId);
-        return languageConfig.then(async (grammar) => {
-          if (grammar) {
-            return this.getDocumentDecorations(document);
-          }
-        });
-      }
-
-      // console.log("Found Tokenizer for " + document.languageId);
-
-      documentDecorations = new DocumentDecoration(document, languageConfig, this.settings);
-      // console.log("Adding " + uri + " to cache");
-      this.documents.set(uri, documentDecorations);
+    // if (documentDecorations === undefined) {
+    const languageConfig = this.tryGetLanguageConfig(document.languageId);
+    if (!languageConfig) {
+      // console.log("Could not find tokenizer for " + document.languageId);
+      return;
     }
+
+    if (languageConfig instanceof Promise) {
+      // console.log("Found Tokenizer promise for " + document.languageId);
+      return languageConfig.then(async (grammar) => {
+        if (grammar) {
+          return this.getDocumentDecorations(document);
+        }
+      });
+    }
+
+    // console.log("Found Tokenizer for " + document.languageId);
+
+    documentDecorations = new DocumentDecoration(document, languageConfig, this.settings);
+    // console.log("Adding " + uri + " to cache");
+    this.documents.set(uri, documentDecorations);
+    // }
 
     // console.log("Retrieved " + uri + " from cache");
     return documentDecorations;

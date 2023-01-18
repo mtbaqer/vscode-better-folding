@@ -41,8 +41,7 @@ export default class DocumentDecoration {
       } else {
         this.lines.splice(minLineIndexToUpdate);
       }
-      this.tokenizeDocument();
-      return;
+      return this.tokenizeDocument();
     }
 
     const change = contentChanges[0];
