@@ -15,16 +15,14 @@ export function activate(context: ExtensionContext) {
   }, 1000);
 
   context.subscriptions.push(
+    window.onDidChangeVisibleTextEditors(() => {
+      bracketRangesProvider.updateAllDocuments();
+    }),
     workspace.onDidChangeTextDocument((e) => {
-      if (e) bracketRangesProvider.provideFoldingRanges(e.document);
+      if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
     }),
     window.onDidChangeTextEditorVisibleRanges((e) => {
-      if (e) foldingDecorator.triggerUpdateDecorations();
-    }),
-    window.onDidChangeActiveTextEditor((e) => {
-      // This is a hack to get around the fact that visible ranges are cleared when the document is changed,
-      // even when some ranges are folded.
-      if (e) setTimeout(() => foldingDecorator.triggerUpdateDecorations(true), 150);
+      if (e) foldingDecorator.triggerUpdateDecorations(e.textEditor);
     })
   );
 

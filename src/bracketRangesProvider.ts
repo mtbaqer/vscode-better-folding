@@ -1,4 +1,4 @@
-import { CancellationToken, FoldingContext, TextDocument } from "vscode";
+import { CancellationToken, FoldingContext, TextDocument, Uri } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
 import { bracketsToBracketsRanges } from "./utils/utils";
@@ -6,13 +6,22 @@ import BracketsManager from "./BracketManager/bracketsManager";
 import BracketsRange from "./utils/classes/bracketsRange";
 import ExtendedMap from "./utils/classes/extendedMap";
 
+type PositionPair = [line: number, column: number];
+
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
-  private document: TextDocument = null!; //TODO: Make this type safe
-  private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
-  private positionToFoldingRange: ExtendedMap<[line: number, column: number], BetterFoldingRange> = new ExtendedMap();
-  private bracketsManager: BracketsManager = new BracketsManager();
+  private readonly bracketsManager: BracketsManager = new BracketsManager();
+  //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
+  private readonly documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
+  private readonly positionToFoldingRange: ExtendedMap<PositionPair, BetterFoldingRange | undefined>;
 
   constructor() {
+    this.documentToFoldingRanges = new ExtendedMap(async () => []);
+    this.positionToFoldingRange = new ExtendedMap(() => undefined);
+
+    this.updateAllDocuments();
+  }
+
+  public updateAllDocuments() {
     this.bracketsManager.updateAllDocuments();
   }
 
@@ -23,42 +32,40 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     useCachedRanges = false
   ): Promise<BetterFoldingRange[]> {
     if (useCachedRanges) {
-      return this.foldingRanges;
+      return this.documentToFoldingRanges.get(document.uri);
     }
 
-    this.foldingRanges = this.updateFoldingRanges(document);
-    return this.foldingRanges;
+    this.documentToFoldingRanges.set(document.uri, this.updateFoldingRanges(document));
+    return this.documentToFoldingRanges.get(document.uri)!;
   }
 
   private async updateFoldingRanges(document: TextDocument) {
-    this.document = document;
     const allBrackets = await this.bracketsManager.updateDocument(document);
-
     if (!allBrackets) return [];
 
     const bracketsRanges = bracketsToBracketsRanges(allBrackets);
-    const foldingRanges = this.bracketsRangesToFoldingRanges(bracketsRanges);
+    const foldingRanges = this.bracketsRangesToFoldingRanges(bracketsRanges, document);
 
     return foldingRanges;
   }
 
-  private bracketsRangesToFoldingRanges(bracketsRanges: BracketsRange[]): BetterFoldingRange[] {
+  private bracketsRangesToFoldingRanges(bracketsRanges: BracketsRange[], document: TextDocument): BetterFoldingRange[] {
     this.positionToFoldingRange.clear();
 
     const foldingRanges: BetterFoldingRange[] = [];
     for (const bracketsRange of bracketsRanges) {
       if (bracketsRange.start.line === bracketsRange.end.line) continue;
-      const foldingRange = this.toFoldingRange(bracketsRange);
+      const foldingRange = this.toFoldingRange(bracketsRange, document);
       foldingRanges.push(foldingRange);
 
       const line = foldingRange.start;
-      const column = foldingRange.startColumn ?? this.document.lineAt(line).text.length;
+      const column = foldingRange.startColumn ?? document.lineAt(line).text.length;
       this.positionToFoldingRange.set([line, column], foldingRange);
     }
     return foldingRanges;
   }
 
-  private toFoldingRange(bracketsRange: BracketsRange): BetterFoldingRange {
+  private toFoldingRange(bracketsRange: BracketsRange, document: TextDocument): BetterFoldingRange {
     const foldClosingBrackets = config.foldClosingBrackets();
 
     let start = bracketsRange.start.line;
@@ -67,7 +74,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     let collapsedText = this.getCollapsedText(bracketsRange);
 
     if (foldClosingBrackets) {
-      [start, end, collapsedText] = this.chainFoldingRanges(bracketsRange, collapsedText);
+      [start, end, collapsedText] = this.chainFoldingRanges(bracketsRange, collapsedText, document);
     }
 
     return { start, end, startColumn, collapsedText };
@@ -107,13 +114,14 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
 
   private chainFoldingRanges(
     bracketsRange: BracketsRange,
-    initialCollapsedText: string
+    initialCollapsedText: string,
+    document: TextDocument
   ): [start: number, end: number, collapsedText: string] {
     let end = bracketsRange.end.line;
     let collapsedText = initialCollapsedText;
 
     const line = bracketsRange.end.line;
-    const lineContent = this.document.lineAt(line).text;
+    const lineContent = document.lineAt(line).text;
 
     for (let column = bracketsRange.end.character; column < lineContent.length; column++) {
       const foldingRange = this.positionToFoldingRange.get([line, column]);

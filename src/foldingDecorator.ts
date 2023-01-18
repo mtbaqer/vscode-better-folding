@@ -5,9 +5,11 @@ import {
   TextDocument,
   TextEditor,
   TextEditorDecorationType,
+  Uri,
   window,
 } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
+import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap } from "./utils/utils";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
@@ -15,11 +17,10 @@ const DEFAULT_COLLAPSED_TEXT = "…";
 export default class FoldingDecorator extends Disposable {
   timeout: NodeJS.Timer | undefined = undefined;
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
-  decorations: TextEditorDecorationType[] = [];
   unfoldedDecoration = window.createTextEditorDecorationType({});
 
-  //TODO: do a per text editor cache
-  cachedFoldedLines: number[] = [];
+  decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
+  cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
 
   constructor() {
     super(() => this.clearDecorations());
@@ -33,13 +34,17 @@ export default class FoldingDecorator extends Disposable {
     this.providers[selector].push(provider);
   }
 
-  public triggerUpdateDecorations(clearCache = false) {
-    let activeEditor = window.activeTextEditor;
-    if (!activeEditor) return;
+  public triggerUpdateDecorations(editor?: TextEditor) {
+    if (window.visibleTextEditors.length === 0) return;
 
     if (!this.timeout) {
-      if (clearCache) this.clearCache();
-      this.updateDecorations(activeEditor);
+      if (editor) {
+        this.updateDecorations(editor);
+      } else {
+        for (const editor of window.visibleTextEditors) {
+          this.updateDecorations(editor);
+        }
+      }
 
       this.timeout = setTimeout(() => {
         clearTimeout(this.timeout);
@@ -48,19 +53,29 @@ export default class FoldingDecorator extends Disposable {
     }
   }
 
-  private async updateDecorations(activeEditor: TextEditor) {
-    this.cacheFoldedLines(activeEditor.visibleRanges);
+  private async updateDecorations(editor: TextEditor) {
+    this.cacheFoldedLines(editor.visibleRanges, editor);
 
-    const foldingRanges = await this.getRanges(activeEditor.document);
-    this.clearDecorations();
+    const foldingRanges = await this.getRanges(editor.document);
+    this.clearDecorations(editor);
 
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
-    this.decorations = this.applyDecorations(activeEditor, foldingRanges, decorationOptions);
+    const newDecorations = this.applyDecorations(editor, foldingRanges, decorationOptions);
+    this.setDecorations(editor, newDecorations);
   }
 
-  private clearDecorations() {
-    this.decorations.forEach((decoration) => decoration.dispose());
-    this.unfoldedDecoration.dispose();
+  private clearDecorations(editor?: TextEditor) {
+    if (editor) {
+      for (const decoration of this.getDecorations(editor)) {
+        decoration.dispose();
+      }
+      editor.setDecorations(this.unfoldedDecoration, []);
+    } else {
+      for (const decorations of this.decorations.values()) {
+        decorations.forEach((decoration) => decoration.dispose());
+      }
+      this.unfoldedDecoration.dispose();
+    }
   }
 
   private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
@@ -104,7 +119,7 @@ export default class FoldingDecorator extends Disposable {
   }
 
   private applyDecorations(
-    activeEditor: TextEditor,
+    editor: TextEditor,
     foldingRanges: BetterFoldingRange[],
     decorationOptions: DecorationRenderOptions[]
   ): TextEditorDecorationType[] {
@@ -118,51 +133,68 @@ export default class FoldingDecorator extends Disposable {
       decorations.push(decoration);
 
       const foldingRanges = collapsedTextToFoldingRanges.get(decorationOption.before!.contentText!)!;
-      const ranges: Range[] = foldingRanges.map(foldingRangeToRange(activeEditor.document));
+      const ranges: Range[] = foldingRanges.map(foldingRangeToRange(editor.document));
 
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
-        if (this.isFolded(range.start.line)) foldedRanges.push(range);
+        if (this.isFolded(range.start.line, editor)) foldedRanges.push(range);
         else unfoldedRanges.push(range);
       }
 
-      activeEditor.setDecorations(decoration, foldedRanges);
+      editor.setDecorations(decoration, foldedRanges);
     }
-    activeEditor.setDecorations(this.unfoldedDecoration, unfoldedRanges);
+    editor.setDecorations(this.unfoldedDecoration, unfoldedRanges);
 
     return decorations;
   }
 
-  private isFolded(line: number): boolean {
-    for (const cachedFoldedLine of this.cachedFoldedLines) {
+  private isFolded(line: number, editor: TextEditor): boolean {
+    for (const cachedFoldedLine of this.getCachedFoldedLines(editor)) {
       if (cachedFoldedLine === line) return true;
     }
     return false;
   }
 
-  private cacheFoldedLines(visibleRanges: readonly Range[]) {
+  private cacheFoldedLines(visibleRanges: readonly Range[], editor: TextEditor) {
     if (visibleRanges.length === 0) return;
+    const cachedLines = this.getCachedFoldedLines(editor);
+    const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
 
-    if (this.cachedFoldedLines.length === 0) {
-      this.cachedFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
+    if (cachedLines.length === 0) {
+      this.setCachedFoldedLines(editor, currentFoldedLines);
       return;
     }
 
-    const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
-    const newFoldedLines = currentFoldedLines.filter((line) => !this.cachedFoldedLines.includes(line));
-    this.cachedFoldedLines.push(...newFoldedLines);
-    this.cachedFoldedLines.sort((a, b) => a - b); //TODO: Optimize this by inserting lines in the right place.
+    //TODO: Optimize this.
+    //Match the folded lines between editor and cached lines.
+    const newFoldedLines = currentFoldedLines.filter((line) => !cachedLines.includes(line));
+    cachedLines.push(...newFoldedLines);
+    cachedLines.sort((a, b) => a - b);
 
+    //Match the unfolded lines between editor and cached lines.
     const currentFoldedLinesSet = new Set(currentFoldedLines);
-    this.cachedFoldedLines = this.cachedFoldedLines.filter(
+    const cachedLinesMinusUnfoldedLines = cachedLines.filter(
       (line) =>
         currentFoldedLinesSet.has(line) ||
         line <= visibleRanges[0].start.line ||
         line >= visibleRanges[visibleRanges.length - 1].end.line
     );
+    this.setCachedFoldedLines(editor, cachedLinesMinusUnfoldedLines);
   }
 
-  private clearCache() {
-    this.cachedFoldedLines = [];
+  private getDecorations(editor: TextEditor): TextEditorDecorationType[] {
+    return this.decorations.get(editor.document.uri);
+  }
+
+  private setDecorations(editor: TextEditor, decorations: TextEditorDecorationType[]) {
+    this.decorations.set(editor.document.uri, decorations);
+  }
+
+  private getCachedFoldedLines(editor: TextEditor): number[] {
+    return this.cachedFoldedLines.get(editor.document.uri);
+  }
+
+  private setCachedFoldedLines(editor: TextEditor, lines: number[]) {
+    this.cachedFoldedLines.set(editor.document.uri, lines);
   }
 }
