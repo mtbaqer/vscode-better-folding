@@ -18,22 +18,20 @@
     "configuration": {
       "title": "Better Folding",
       "properties": {
-        "better-folding.foldClosingBrackets": {
+        "betterFolding.foldClosingBrackets": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "Include closing brackets like `}` and `]` in the folding range."
         },
-        "better-folding.collapsedTextStrategy": {
-          "type": "string",
-          "default": "ellipsis",
-          "enum": [
-            "ellipsis",
-            "count body lines"
-          ],
-          "markdownEnumDescriptions": [
-            "`…` (ellipsis) character. Example: `{…}`.",
-            "Counts the number of lines folded, excluding the closing bracket line. Example: `{ ⋯ 2 lines ⋯ }`."
-          ]
+        "betterFolding.showFoldedBodyLinesCount": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Shows the number of lines folded, excluding the closing bracket line. \n\nExample: `function example() { ⋯ 3 lines ⋯ `"
+        },
+        "betterFolding.showFoldedBrackets": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Shows brackets like `{` and `}` in the collapsed text. Only applies if `#betterFolding.foldClosingBrackets#` is `enabled`. \n\nExample: `function example() {…}`."
         }
       }
     }

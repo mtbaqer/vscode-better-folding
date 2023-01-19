@@ -68,13 +68,14 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
 
   private toFoldingRange(bracketsRange: BracketsRange, document: TextDocument): BetterFoldingRange {
     const foldClosingBrackets = config.foldClosingBrackets();
+    const showFoldedBrackets = config.showFoldedBrackets();
 
     let start = bracketsRange.start.line;
     let end = bracketsRange.end.line - (foldClosingBrackets ? 0 : 1);
     let startColumn = this.getStartColumn(bracketsRange);
     let collapsedText = this.getCollapsedText(bracketsRange);
 
-    if (foldClosingBrackets) {
+    if (showFoldedBrackets) {
       [start, end, collapsedText] = this.chainFoldingRanges(bracketsRange, collapsedText, document);
     }
 
@@ -82,11 +83,9 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getStartColumn(bracketsRange: BracketsRange): number | undefined {
-    const foldClosingBrackets = config.foldClosingBrackets();
+    const showFoldedBrackets = config.showFoldedBrackets();
 
-    //TODO: make foldClosingBracket related to only folding the last line.
-    //and add a new "brackets" option for collapsedTextStrategy.
-    if (!foldClosingBrackets) return undefined;
+    if (!showFoldedBrackets) return undefined;
 
     return bracketsRange.start.character; //Position.character is confusingly the column.
   }
@@ -94,12 +93,15 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   private getCollapsedText(bracketsRange: BracketsRange): string {
     let collapsedText = "…";
 
-    const collapsedTextStrategy = config.collapsedTextStrategy();
-    if (collapsedTextStrategy === "count body lines") {
+    const showFoldedBodyLinesCount = config.showFoldedBodyLinesCount();
+    if (showFoldedBodyLinesCount) {
       collapsedText = this.getFoldedLinesCountCollapsedText(bracketsRange);
     }
 
-    collapsedText = this.surroundWithBrackets(bracketsRange, collapsedText);
+    const showFoldedBrackets = config.showFoldedBrackets();
+    if (showFoldedBrackets) {
+      collapsedText = this.surroundWithBrackets(bracketsRange, collapsedText);
+    }
 
     return collapsedText;
   }

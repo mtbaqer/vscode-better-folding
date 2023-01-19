@@ -1,12 +1,15 @@
 import { workspace } from "vscode";
 
-const EXTENSION_ID = "better-folding";
+const CONFIG_ID = "betterFolding";
 
 export function foldClosingBrackets() {
-  return workspace.getConfiguration(EXTENSION_ID).get<boolean>("foldClosingBrackets") ?? false;
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("foldClosingBrackets") ?? false;
 }
 
-type CollapsedTextStrategy = "ellipsis" | "count body lines";
-export function collapsedTextStrategy() {
-  return workspace.getConfiguration(EXTENSION_ID).get<CollapsedTextStrategy>("collapsedTextStrategy") ?? "ellipsis";
+export function showFoldedBodyLinesCount() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFoldedBodyLinesCount") && foldClosingBrackets();
+}
+
+export function showFoldedBrackets() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFoldedBrackets") ?? false;
 }
