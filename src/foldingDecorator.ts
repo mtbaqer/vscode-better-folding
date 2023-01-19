@@ -177,7 +177,7 @@ export default class FoldingDecorator extends Disposable {
     const cachedLinesMinusUnfoldedLines = cachedLines.filter(
       (line) =>
         currentFoldedLinesSet.has(line) ||
-        line <= visibleRanges[0].start.line ||
+        line < visibleRanges[0].start.line ||
         line >= visibleRanges[visibleRanges.length - 1].end.line
     );
     this.setCachedFoldedLines(editor, cachedLinesMinusUnfoldedLines);
