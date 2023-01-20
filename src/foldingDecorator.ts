@@ -121,7 +121,7 @@ export default class FoldingDecorator extends Disposable {
         height: "0",
         contentText,
         color: "rgba(255, 255, 255, 0.5)", //TODO: Get this from the theme
-        margin: `0 -${100}% 0 0`, //Hides the original collapsed text '…'
+        margin: `0 -${90}% 0 0`, //Hides the original collapsed text '…'
         textDecoration: "none; cursor: pointer !important;",
       },
     };
