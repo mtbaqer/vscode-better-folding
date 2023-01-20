@@ -1,7 +1,7 @@
 import { TextDocument, Range } from "vscode";
 import { BetterFoldingRange } from "../types";
-import Bracket from "../BracketManager/bracket";
-import BracketClose from "../BracketManager/bracketClose";
+import Bracket from "../bracket-pair-colorizer-2 src/bracket";
+import BracketClose from "../bracket-pair-colorizer-2 src/bracketClose";
 import BracketsRange from "./classes/bracketsRange";
 
 export function groupArrayToMap<T, V>(array: T[], getValue: (element: T) => V, defaultValue?: V): Map<V, T[]> {

@@ -2,7 +2,7 @@ import { CancellationToken, FoldingContext, TextDocument, Uri } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
 import { bracketsToBracketsRanges } from "./utils/utils";
-import BracketsManager from "./BracketManager/bracketsManager";
+import BracketsManager from "./bracket-pair-colorizer-2 src/bracketsManager";
 import BracketsRange from "./utils/classes/bracketsRange";
 import ExtendedMap from "./utils/classes/extendedMap";
 
