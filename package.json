@@ -32,6 +32,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Shows brackets like `{` and `}` in the collapsed text. Only applies if `#betterFolding.foldClosingBrackets#` is `enabled`. \n\nExample: `function example() {…}`."
+        },
+        "betterFolding.excludedLanguages": {
+          "type": "array",
+          "default": [],
+          "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
         }
       }
     }

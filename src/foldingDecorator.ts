@@ -11,6 +11,7 @@ import {
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap } from "./utils/utils";
+import * as config from "./configuration";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
@@ -81,6 +82,9 @@ export default class FoldingDecorator extends Disposable {
   }
 
   private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
+    const excludedLanguages = config.excludedLanguages();
+    if (excludedLanguages.includes(document.languageId)) return [];
+
     const ranges: BetterFoldingRange[] = [];
 
     const languageProviders = this.providers[document.languageId] ?? [];

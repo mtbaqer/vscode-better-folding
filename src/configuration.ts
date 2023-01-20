@@ -13,3 +13,7 @@ export function showFoldedBodyLinesCount() {
 export function showFoldedBrackets() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFoldedBrackets") && foldClosingBrackets();
 }
+
+export function excludedLanguages() {
+  return workspace.getConfiguration(CONFIG_ID).get<string[]>("excludedLanguages") ?? [];
+}

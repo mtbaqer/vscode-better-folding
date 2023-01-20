@@ -2,6 +2,7 @@ import { ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./bracketRangesProvider";
 import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
+import * as config from "./configuration";
 
 const bracketRangesProvider = new BracketRangesProvider();
 let foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
@@ -34,16 +35,19 @@ export function activate(context: ExtensionContext) {
   updateAllDocuments();
 }
 
+// Courtesy of vscode-explicit-fold,
+// apparently if you delay the folding provider by a second, it can override the default language folding provider.
 function registerProviders(context: ExtensionContext, delay = 0) {
-  // Courtesy of vscode-explicit-fold,
-  // apparently if you delay the folding provider by a second, it can override the default language folding provider.
+  const excludedLanguages = config.excludedLanguages();
+
   for (const editor of window.visibleTextEditors) {
-    if (!registeredLanguages.has(editor.document.languageId)) {
-      registeredLanguages.add(editor.document.languageId);
+    const languageId = editor.document.languageId;
+
+    if (!registeredLanguages.has(languageId) && !excludedLanguages.includes(languageId)) {
+      registeredLanguages.add(languageId);
+
       setTimeout(() => {
-        context.subscriptions.push(
-          languages.registerFoldingRangeProvider(editor.document.languageId, bracketRangesProvider)
-        );
+        context.subscriptions.push(languages.registerFoldingRangeProvider(languageId, bracketRangesProvider));
       }, delay);
     }
   }
