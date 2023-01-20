@@ -6,25 +6,18 @@ import FoldingDecorator from "./foldingDecorator";
 const bracketRangesProvider = new BracketRangesProvider();
 let foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
 
+const registeredLanguages = new Set<string>();
+
 export function activate(context: ExtensionContext) {
   context.subscriptions.push(foldingDecorator);
-
-  // Courtesy of vscode-explicit-fold,
-  // apparently if you delay the folding provider by a second, it can override the default language folding provider.
-  setTimeout(() => {
-    context.subscriptions.push(languages.registerFoldingRangeProvider("typescript", bracketRangesProvider));
-  }, 1000);
 
   context.subscriptions.push(
     workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_ID)) restart();
     }),
     window.onDidChangeVisibleTextEditors(() => {
-      //Delay since vscode does not provide the right visible ranges right away.
-      setTimeout(async () => {
-        bracketRangesProvider.updateAllDocuments();
-        foldingDecorator.triggerUpdateDecorations();
-      }, 150);
+      updateAllDocuments();
+      registerProviders(context);
     }),
     workspace.onDidChangeTextDocument((e) => {
       if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
@@ -34,15 +27,38 @@ export function activate(context: ExtensionContext) {
     })
   );
 
-  function restart() {
-    bracketRangesProvider.restart();
+  registerProviders(context, 1000);
+  updateAllDocuments();
+}
 
-    foldingDecorator.dispose();
-    foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
+function registerProviders(context: ExtensionContext, delay = 0) {
+  // Courtesy of vscode-explicit-fold,
+  // apparently if you delay the folding provider by a second, it can override the default language folding provider.
+  for (const editor of window.visibleTextEditors) {
+    if (!registeredLanguages.has(editor.document.languageId)) {
+      registeredLanguages.add(editor.document.languageId);
+      setTimeout(() => {
+        context.subscriptions.push(
+          languages.registerFoldingRangeProvider(editor.document.languageId, bracketRangesProvider)
+        );
+      }, delay);
+    }
   }
+}
 
+function updateAllDocuments() {
+  //Delayed since vscode does not provide the right visible ranges right away when opening a new document.
   bracketRangesProvider.updateAllDocuments();
-  foldingDecorator.triggerUpdateDecorations();
+  setTimeout(async () => {
+    foldingDecorator.triggerUpdateDecorations();
+  }, 500);
+}
+
+function restart() {
+  bracketRangesProvider.restart();
+
+  foldingDecorator.dispose();
+  foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
 }
 
 export function deactivate() {
