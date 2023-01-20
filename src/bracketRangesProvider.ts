@@ -9,11 +9,11 @@ import ExtendedMap from "./utils/classes/extendedMap";
 type PositionPair = [line: number, column: number];
 
 export class BracketRangesProvider implements BetterFoldingRangeProvider {
-  private readonly bracketsManager: BracketsManager = new BracketsManager();
+  private bracketsManager: BracketsManager = new BracketsManager();
 
   //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
-  private readonly documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
-  private readonly positionToFoldingRange: ExtendedMap<PositionPair, BetterFoldingRange | undefined>;
+  private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
+  private positionToFoldingRange: ExtendedMap<PositionPair, BetterFoldingRange | undefined>;
 
   constructor() {
     this.documentToFoldingRanges = new ExtendedMap(async () => []);
@@ -138,5 +138,11 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     }
 
     return [bracketsRange.start.line, end, collapsedText];
+  }
+
+  public restart() {
+    this.bracketsManager = new BracketsManager();
+    this.documentToFoldingRanges.clear();
+    this.positionToFoldingRange.clear();
   }
 }

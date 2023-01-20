@@ -23,7 +23,7 @@ export default class FoldingDecorator extends Disposable {
   cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
 
   constructor() {
-    super(() => this.clearDecorations());
+    super(() => this.dispose());
   }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {
@@ -197,5 +197,9 @@ export default class FoldingDecorator extends Disposable {
 
   private setCachedFoldedLines(editor: TextEditor, lines: number[]) {
     this.cachedFoldedLines.set(editor.document.uri, lines);
+  }
+
+  public dispose() {
+    this.clearDecorations();
   }
 }

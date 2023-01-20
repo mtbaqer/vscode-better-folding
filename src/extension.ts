@@ -1,9 +1,10 @@
 import { ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./bracketRangesProvider";
+import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
 
+let foldingDecorator = new FoldingDecorator();
 export function activate(context: ExtensionContext) {
-  const foldingDecorator = new FoldingDecorator();
   context.subscriptions.push(foldingDecorator);
   const bracketRangesProvider = new BracketRangesProvider();
 
@@ -15,8 +16,14 @@ export function activate(context: ExtensionContext) {
   }, 1000);
 
   context.subscriptions.push(
+    workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration(CONFIG_ID)) restart();
+    }),
     window.onDidChangeVisibleTextEditors(() => {
-      bracketRangesProvider.updateAllDocuments();
+      setTimeout(async () => {
+        bracketRangesProvider.updateAllDocuments();
+        foldingDecorator.triggerUpdateDecorations();
+      }, 150);
     }),
     workspace.onDidChangeTextDocument((e) => {
       if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
@@ -26,7 +33,18 @@ export function activate(context: ExtensionContext) {
     })
   );
 
+  function restart() {
+    bracketRangesProvider.restart();
+
+    foldingDecorator.dispose();
+    foldingDecorator = new FoldingDecorator();
+    foldingDecorator.registerFoldingRangeProvider("typescript", bracketRangesProvider);
+  }
+
+  bracketRangesProvider.updateAllDocuments();
   foldingDecorator.triggerUpdateDecorations();
 }
 
-export function deactivate() {}
+export function deactivate() {
+  foldingDecorator.dispose();
+}
