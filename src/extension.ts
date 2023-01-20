@@ -20,6 +20,7 @@ export function activate(context: ExtensionContext) {
       if (event.affectsConfiguration(CONFIG_ID)) restart();
     }),
     window.onDidChangeVisibleTextEditors(() => {
+      //Delay since vscode does not provide the right visible ranges right away.
       setTimeout(async () => {
         bracketRangesProvider.updateAllDocuments();
         foldingDecorator.triggerUpdateDecorations();
