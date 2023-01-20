@@ -9,19 +9,22 @@ let foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
 const registeredLanguages = new Set<string>();
 
 export function activate(context: ExtensionContext) {
-  context.subscriptions.push(foldingDecorator);
-
   context.subscriptions.push(
+    foldingDecorator,
+
     workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration(CONFIG_ID)) restart();
     }),
+
     window.onDidChangeVisibleTextEditors(() => {
       updateAllDocuments();
       registerProviders(context);
     }),
+
     workspace.onDidChangeTextDocument((e) => {
       if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
     }),
+
     window.onDidChangeTextEditorVisibleRanges((e) => {
       foldingDecorator.triggerUpdateDecorations(e.textEditor);
     })
