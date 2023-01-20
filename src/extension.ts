@@ -3,9 +3,11 @@ import { BracketRangesProvider } from "./bracketRangesProvider";
 import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
 import * as config from "./configuration";
+import RegionRangesProvider from "./regionRangesProvider";
 
 const bracketRangesProvider = new BracketRangesProvider();
-let foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
+const regionProvider = new RegionRangesProvider();
+let foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
 
 const registeredLanguages = new Set<string>();
 
@@ -65,7 +67,7 @@ function restart() {
   bracketRangesProvider.restart();
 
   foldingDecorator.dispose();
-  foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
+  foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
 }
 
 export function deactivate() {

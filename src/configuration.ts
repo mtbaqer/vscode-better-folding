@@ -17,3 +17,7 @@ export function showFoldedBrackets() {
 export function excludedLanguages() {
   return workspace.getConfiguration(CONFIG_ID).get<string[]>("excludedLanguages") ?? [];
 }
+
+export function showOnlyRegionsDescriptions() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("showOnlyRegionsDescriptions") ?? false;
+}

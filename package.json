@@ -37,6 +37,11 @@
           "type": "array",
           "default": [],
           "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
+        },
+        "betterFolding.showOnlyRegionsDescriptions": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Only shows the region description in the collapsed text. \n\nExample: `// #region some text`.\n\nBecomes: `some text`."
         }
       }
     }
