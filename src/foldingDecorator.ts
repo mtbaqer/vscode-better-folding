@@ -22,8 +22,9 @@ export default class FoldingDecorator extends Disposable {
   decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
   cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
 
-  constructor() {
+  constructor(universalProviders: BetterFoldingRangeProvider[]) {
     super(() => this.dispose());
+    this.providers["*"] = [...universalProviders];
   }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {
@@ -82,8 +83,11 @@ export default class FoldingDecorator extends Disposable {
   private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
     const ranges: BetterFoldingRange[] = [];
 
-    const providers = this.providers[document.languageId] ?? [];
-    for (const provider of providers) {
+    const languageProviders = this.providers[document.languageId] ?? [];
+    const universalProviders = this.providers["*"] ?? [];
+    const allProviders = [...languageProviders, ...universalProviders];
+
+    for (const provider of allProviders) {
       const providerRanges = await provider.provideFoldingRanges(document, undefined, undefined, true);
       ranges.push(...providerRanges);
     }

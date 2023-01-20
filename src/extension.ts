@@ -3,16 +3,16 @@ import { BracketRangesProvider } from "./bracketRangesProvider";
 import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
 
-let foldingDecorator = new FoldingDecorator();
+const bracketRangesProvider = new BracketRangesProvider();
+let foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
+
 export function activate(context: ExtensionContext) {
   context.subscriptions.push(foldingDecorator);
-  const bracketRangesProvider = new BracketRangesProvider();
 
   // Courtesy of vscode-explicit-fold,
   // apparently if you delay the folding provider by a second, it can override the default language folding provider.
   setTimeout(() => {
     context.subscriptions.push(languages.registerFoldingRangeProvider("typescript", bracketRangesProvider));
-    foldingDecorator.registerFoldingRangeProvider("typescript", bracketRangesProvider);
   }, 1000);
 
   context.subscriptions.push(
@@ -38,8 +38,7 @@ export function activate(context: ExtensionContext) {
     bracketRangesProvider.restart();
 
     foldingDecorator.dispose();
-    foldingDecorator = new FoldingDecorator();
-    foldingDecorator.registerFoldingRangeProvider("typescript", bracketRangesProvider);
+    foldingDecorator = new FoldingDecorator([bracketRangesProvider]);
   }
 
   bracketRangesProvider.updateAllDocuments();
