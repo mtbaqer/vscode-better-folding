@@ -13,7 +13,7 @@ Better Folding provides many commonly requested folding-related features all tog
 <p align="center">
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/Preview.png"
-  alt="VS Code Blockman Icon"
+  alt="Better Folding Extension Preview"
 />
 </p>
 
@@ -26,7 +26,7 @@ This is the first release of the extension, so it is not fully battle tested yet
 <p align="center">
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/closingBrackets.png"
-  alt="VS Code Blockman Icon"
+  alt="Better Folding Extension Folding Closing Brackets Feature Preview"
 />
 </p>
 
@@ -36,7 +36,7 @@ This is the first release of the extension, so it is not fully battle tested yet
 <p align="center">
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/lineCount.png"
-  alt="VS Code Blockman Icon"
+  alt="Better Folding Extension Showing Folded Lines Count Feature Preview"
 />
 </p>
 
@@ -45,7 +45,7 @@ This is the first release of the extension, so it is not fully battle tested yet
 <p align="center">
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/showFoldedBrackets.png"
-  alt="VS Code Blockman Icon"
+  alt="Better Folding Extension Showing Folded Brackets Feature Preview"
 />
 </p>
 
@@ -54,7 +54,7 @@ This is the first release of the extension, so it is not fully battle tested yet
 <p align="center">
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/regions.png"
-  alt="VS Code Blockman Icon"
+  alt="Better Folding Extension Showing Only The Region Description Feature Preview"
 />
 </p>
 
