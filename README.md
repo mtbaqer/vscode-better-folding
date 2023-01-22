@@ -97,7 +97,9 @@ Shows brackets like `{` and `}` in the collapsed text.
 
 ## Known Issues
 
-- Folding not working if it is the at the end of the file (you can temporarily fix this by add an empty comment below it). This is a problem with VSCode API, waiting the bug to be address by the VSCode team.
+- When switching between tabs, the folding ranges take a second to update. This is an issue with [VS Code itself](https://github.com/microsoft/vscode/issues/154977). Waiting for a fix.
+- If a folding range is at the end of the file, sometimes it would fold the start line while scrolling. Again, this is an issue with VS Code API, will submit an issue to their repo soon.
+- The cursor can hide behind the folded text. Working on a fix.
 
 ## Big thanks to these source codes
 [Bracket-Pair-Colorizer-2](https://github.com/CoenraadS/Bracket-Pair-Colorizer-2) (by CoenraadS)
