@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/mtbaqer/vscode-better-folding.git"
   },
-  "icon": "demo-media/icon/icon_large.png",
+  "icon": "icon_large.png",
   "publisher": "MohammadBaqer",
   "categories": [
     "Other"
@@ -52,7 +52,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
@@ -65,15 +69,16 @@
     "@types/node": "16.x",
     "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/typescript-estree": "^5.48.2",
     "@vscode/test-electron": "^2.2.0",
+    "esbuild": "^0.17.4",
     "eslint": "^8.32.0",
     "glob": "^8.0.3",
     "mocha": "^10.1.0",
-    "prettier": "2.8.2"
+    "prettier": "2.8.2",
+    "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@typescript-eslint/typescript-estree": "^5.48.1",
-    "json5": "^2.2.3",
-    "typescript": "^4.9.4"
+    "json5": "^2.2.3"
   }
 }

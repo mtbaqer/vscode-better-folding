@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="128" alt="icon" src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/icon/icon_large.png">
+    <img width="128" alt="icon" src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/icon_large.png">
 </p>
 
 <h2 align="center"> Better Folding - VSCode Extension </h2>
