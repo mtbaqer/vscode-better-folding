@@ -1,23 +1,63 @@
+<p align="center">
+    <img width="128" alt="icon" src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/icon/icon_large.png">
+</p>
+
+<h2 align="center"> Better Folding - VSCode Extension </h2>
+
 # Better Folding
 
-Better Folding provides many commonly requested folding-related features put all together in one extension. 
+Better Folding provides many commonly requested folding-related features all together in one extension. 
 
-[Preview](demo-media/images/Preview.png)
+</br>
 
-[Preview with line count](demo-media/images/PreviewWithCount.png)
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/Preview.png"
+  alt="VS Code Blockman Icon"
+  width="75%"
+/>
+</p>
+
+## Disclaimer
+This is the first release of the extension, so it is not fully battle tested yet. If you encounter any issue or would like to contribute, [please visit the GitHub page](https://github.com/mtbaqer/vscode-better-folding).
 
 ## Features
 ### Folding Closing Brackets
 
-[Closing Brackets](demo-media/images/closingBrackets.png)
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/closingBrackets.png"
+  alt="VS Code Blockman Icon"
+/>
+</p>
+
 
 ### Showing Folded Lines Count
 
-[Closing Brackets](demo-media/images/lineCount.png)
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/lineCount.png"
+  alt="VS Code Blockman Icon"
+/>
+</p>
+
+## Showing Folded Brackets
+
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/showFoldedBrackets.png"
+  alt="VS Code Blockman Icon"
+/>
+</p>
 
 ### Showing Only The Region Description
 
-[Closing Brackets](demo-media/images/regions.png)
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/regions.png"
+  alt="VS Code Blockman Icon"
+/>
+</p>
 
 
 ## Supported Languages:
@@ -45,3 +85,12 @@ Shows brackets like `{` and `}` in the collapsed text.
 ## Known Issues
 
 - Folding not working if it is the at the end of the file (you can temporarily fix this by add an empty comment below it). This is a problem with VSCode API, waiting the bug to be address by the VSCode team.
+
+## Big thanks to these source codes
+[Bracket-Pair-Colorizer-2](https://github.com/CoenraadS/Bracket-Pair-Colorizer-2) (by CoenraadS)
+
+[vscode-blockman](https://github.com/leodevbro/vscode-blockman) (by leodevbro)
+
+[vscode-inline-fold](https://github.com/moalamri/vscode-inline-fold) (by moalamri)
+
+[vscode-explicit-folding](https://github.com/zokugun/vscode-explicit-folding) (by zokugun)
