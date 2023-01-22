@@ -11,6 +11,7 @@
     "url": "https://github.com/mtbaqer/vscode-better-folding.git"
   },
   "icon": "demo-media/icon/icon_large.png",
+  "publisher": "MohammadBaqer",
   "categories": [
     "Other"
   ],
