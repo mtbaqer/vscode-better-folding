@@ -14,7 +14,6 @@ Better Folding provides many commonly requested folding-related features all tog
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/Preview.png"
   alt="VS Code Blockman Icon"
-  width="75%"
 />
 </p>
 
@@ -59,6 +58,20 @@ This is the first release of the extension, so it is not fully battle tested yet
 />
 </p>
 
+## Planned Features
+
+### Folding closing HTML/JSX/TSX tags
+Based on [microsoft/vscode#24515](https://github.com/microsoft/vscode/issues/24515)
+
+### Show function content for short functions
+Based on [microsoft/vscode#76396](https://github.com/microsoft/vscode/issues/76396)
+
+### Show objects preview
+Based on [microsoft/vscode#168028](https://github.com/microsoft/vscode/issues/168028)
+
+### Show only function arguments names in folded function parentheses
+
+Inspired by [microsoft/pylance-release#3385](https://github.com/microsoft/pylance-release/issues/3385)
 
 ## Supported Languages:
 **Most brackets-based languages:** JavaScript, TypeScript, C, C#, C++, Java, Kotlin, PHP, Go (Golang), Dart, Rust, Swift, CSS, LESS, SCSS and more...
