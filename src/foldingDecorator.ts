@@ -10,7 +10,7 @@ import {
 } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import ExtendedMap from "./utils/classes/extendedMap";
-import { foldingRangeToRange, groupArrayToMap } from "./utils/utils";
+import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/utils";
 import * as config from "./configuration";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
@@ -150,7 +150,9 @@ export default class FoldingDecorator extends Disposable {
         else unfoldedRanges.push(range);
       }
 
-      editor.setDecorations(decoration, foldedRanges);
+      const inlineFoldedRanges = foldedRanges.map(rangeToInlineRange(editor.document));
+
+      editor.setDecorations(decoration, inlineFoldedRanges);
     }
     editor.setDecorations(this.unfoldedDecoration, unfoldedRanges);
 

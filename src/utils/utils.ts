@@ -32,6 +32,11 @@ export function foldingRangeToRange(document: TextDocument): (foldingRange: Bett
     );
 }
 
+export function rangeToInlineRange(document: TextDocument): (range: Range) => Range {
+  return (range) =>
+    new Range(range.start.line, range.start.character, range.start.line, document.lineAt(range.start).text.length);
+}
+
 export function bracketsToBracketsRanges(brackets: Bracket[], sortBy: "end" | "start" = "end"): BracketsRange[] {
   const ranges: BracketsRange[] = [];
   for (let i = brackets.length - 1; i >= 0; i--) {
