@@ -146,7 +146,7 @@ export default class FoldingDecorator extends Disposable {
 
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
-        if (this.isFolded(range.start.line, editor)) foldedRanges.push(range);
+        if (this.isFolded(range, editor)) foldedRanges.push(range);
         else unfoldedRanges.push(range);
       }
 
@@ -157,10 +157,30 @@ export default class FoldingDecorator extends Disposable {
     return decorations;
   }
 
-  private isFolded(line: number, editor: TextEditor): boolean {
+  private isFolded(range: Range, editor: TextEditor): boolean {
     for (const cachedFoldedLine of this.getCachedFoldedLines(editor)) {
-      if (cachedFoldedLine === line) return true;
+      if (cachedFoldedLine === range.start.line) return true;
     }
+    return this.checkRangeAtEndOfDocumentCase(range, editor);
+  }
+
+  //TODO: clean this up.
+  //Band-aid fix for now.
+  private checkRangeAtEndOfDocumentCase(range: Range, editor: TextEditor) {
+    const lastLine = editor.document.lineCount - 1;
+    const justBeforeLastLine = lastLine - 1;
+    const rangeAtEndOfDocument = range.end.line === lastLine || range.end.line === justBeforeLastLine;
+
+    const lastVisibleLine = editor.visibleRanges[editor.visibleRanges.length - 1].end.line;
+
+    if (rangeAtEndOfDocument && lastVisibleLine <= range.start.line) {
+      this.getCachedFoldedLines(editor).push(range.start.line);
+      return true;
+    }
+    this.setCachedFoldedLines(
+      editor,
+      this.getCachedFoldedLines(editor).filter((line) => line !== range.start.line)
+    );
     return false;
   }
 
