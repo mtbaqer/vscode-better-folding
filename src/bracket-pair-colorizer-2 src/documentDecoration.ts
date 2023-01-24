@@ -164,7 +164,30 @@ export default class DocumentDecoration {
         newLine.addBracket(match.content, match.index, lookup.key, lookup.open);
       }
     }
+
+    const paramsTokens = this.getFunctionParametersTokens(index, newText, previousLineRuleStack);
+    for (const token of paramsTokens) newLine.addToken(token);
+
     return newLine;
+  }
+
+  private getFunctionParametersTokens(
+    lineIndex: number,
+    text: string,
+    previousLineRuleStack: IStackElement | undefined
+  ): Token[] {
+    const paramsTokens: Token[] = [];
+
+    const tokenized = this.languageConfig.grammar.tokenizeLine(text, previousLineRuleStack);
+    const tokens = tokenized.tokens;
+
+    for (let token of tokens) {
+      if (token.scopes.find((scope) => scope.startsWith("variable.parameter"))) {
+        const content = text.substring(token.startIndex, token.endIndex);
+        paramsTokens.push(new Token(-1, content, token.startIndex, lineIndex));
+      }
+    }
+    return paramsTokens;
   }
 
   private disposeScopeDecorations() {

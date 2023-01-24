@@ -11,14 +11,13 @@ export default class LineState {
   private readonly bracketManager: IBracketManager;
   private readonly settings: Settings;
   private readonly languageConfig: LanguageConfig;
-  private readonly tokens: Token[];
+  private readonly tokens: Token[] = [];
 
   constructor(
     settings: Settings,
     languageConfig: LanguageConfig,
     previousState?: {
       readonly colorIndexes: IBracketManager;
-      readonly tokens: Token[];
     }
   ) {
     this.settings = settings;
@@ -26,10 +25,8 @@ export default class LineState {
 
     if (previousState !== undefined) {
       this.bracketManager = previousState.colorIndexes;
-      this.tokens = previousState.tokens;
     } else {
       this.bracketManager = new SingularBracketGroup(settings);
-      this.tokens = [];
     }
   }
 
@@ -40,7 +37,6 @@ export default class LineState {
   public cloneState(): LineState {
     const clone = {
       colorIndexes: this.bracketManager.copyCumulativeState(),
-      tokens: [...this.tokens],
     };
 
     return new LineState(this.settings, this.languageConfig, clone);
