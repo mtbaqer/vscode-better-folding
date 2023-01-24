@@ -122,11 +122,13 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       collapsedText = this.getFoldedLinesCountCollapsedText(bracketsRange);
     }
 
+    const showFunctionParameters = config.showFunctionParameters();
+    if (showFunctionParameters && bracketsRange.startBracket.token.content === "(") {
+      collapsedText = this.getFunctionParamsCollapsedText(bracketsRange, document);
+    }
+
     const showFoldedBrackets = config.showFoldedBrackets();
     if (showFoldedBrackets) {
-      if (bracketsRange.startBracket.token.content === "(") {
-        collapsedText = this.getFunctionParamsCollapsedText(bracketsRange, document);
-      }
       collapsedText = this.surroundWithBrackets(bracketsRange, collapsedText);
     }
 

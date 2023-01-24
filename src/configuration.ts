@@ -21,3 +21,7 @@ export function excludedLanguages() {
 export function showOnlyRegionsDescriptions() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("showOnlyRegionsDescriptions") ?? false;
 }
+
+export function showFunctionParameters() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFunctionParameters") && showFoldedBrackets();
+}
