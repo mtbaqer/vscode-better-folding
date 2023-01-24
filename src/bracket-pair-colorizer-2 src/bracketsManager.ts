@@ -1,4 +1,5 @@
 import { TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window } from "vscode";
+import { TokenizedDocument } from "../types";
 import Bracket from "./bracket";
 import DocumentDecoration from "./documentDecoration";
 import Settings from "./settings";
@@ -13,7 +14,7 @@ export default class BracketsManager {
     });
   }
 
-  public async updateDocument(document: TextDocument): Promise<Bracket[] | undefined> {
+  public async updateDocument(document: TextDocument): Promise<TokenizedDocument | undefined> {
     // console.log("updateDocument");
 
     const documentDecoration = await this.getDocumentDecorations(document);

@@ -32,7 +32,7 @@ export default class SingularBracketGroup implements IBracketManager {
     const openBracket = new Bracket(token);
     this.allLinesOpenBracketStack.push(openBracket);
     this.allBracketsOnLine.push(openBracket);
-    this.bracketsHash += openBracket.token.character;
+    this.bracketsHash += openBracket.token.content;
   }
 
   public GetAmountOfOpenBrackets(type: number): number {
@@ -45,14 +45,14 @@ export default class SingularBracketGroup implements IBracketManager {
         const openBracket = this.allLinesOpenBracketStack.pop();
         const closeBracket = new BracketClose(token, openBracket!);
         this.allBracketsOnLine.push(closeBracket);
-        this.bracketsHash += closeBracket.token.character;
+        this.bracketsHash += closeBracket.token.content;
         return;
       }
     }
 
     const orphan = new Bracket(token);
     this.allBracketsOnLine.push(orphan);
-    this.bracketsHash += orphan.token.character;
+    this.bracketsHash += orphan.token.content;
   }
 
   public getClosingBracket(position: Position): BracketClose | undefined {

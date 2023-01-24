@@ -11,12 +11,14 @@ export default class LineState {
   private readonly bracketManager: IBracketManager;
   private readonly settings: Settings;
   private readonly languageConfig: LanguageConfig;
+  private readonly tokens: Token[];
 
   constructor(
     settings: Settings,
     languageConfig: LanguageConfig,
     previousState?: {
       readonly colorIndexes: IBracketManager;
+      readonly tokens: Token[];
     }
   ) {
     this.settings = settings;
@@ -24,8 +26,10 @@ export default class LineState {
 
     if (previousState !== undefined) {
       this.bracketManager = previousState.colorIndexes;
+      this.tokens = previousState.tokens;
     } else {
       this.bracketManager = new SingularBracketGroup(settings);
+      this.tokens = [];
     }
   }
 
@@ -36,6 +40,7 @@ export default class LineState {
   public cloneState(): LineState {
     const clone = {
       colorIndexes: this.bracketManager.copyCumulativeState(),
+      tokens: [...this.tokens],
     };
 
     return new LineState(this.settings, this.languageConfig, clone);
@@ -46,6 +51,7 @@ export default class LineState {
   }
 
   public offset(startIndex: number, amount: number) {
+    //TODO: do this for tokens as well.
     this.bracketManager.offset(startIndex, amount);
   }
 
@@ -63,12 +69,18 @@ export default class LineState {
   }
 
   private addOpenBracket(token: Token) {
-    let colorIndex: number;
-
     this.bracketManager.addOpenBracket(token);
   }
 
   private addCloseBracket(token: Token) {
     this.bracketManager.addCloseBracket(token);
+  }
+
+  public addToken(token: Token) {
+    this.tokens.push(token);
+  }
+
+  public getAllTokens(): Token[] {
+    return this.tokens;
   }
 }

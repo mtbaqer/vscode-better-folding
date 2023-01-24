@@ -1,4 +1,6 @@
 import { CancellationToken, FoldingContext, FoldingRange, FoldingRangeKind, TextDocument } from "vscode";
+import Bracket from "./bracket-pair-colorizer-2 src/bracket";
+import Token from "./bracket-pair-colorizer-2 src/token";
 
 export interface BetterFoldingRange extends FoldingRange {
   start: number;
@@ -15,4 +17,9 @@ export interface BetterFoldingRangeProvider {
     token?: CancellationToken,
     useCachedRanges?: boolean
   ): Promise<BetterFoldingRange[]>;
+}
+
+export interface TokenizedDocument {
+  brackets: Bracket[];
+  tokens: Token[];
 }

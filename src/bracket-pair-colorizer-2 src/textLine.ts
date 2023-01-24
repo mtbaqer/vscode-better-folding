@@ -3,6 +3,7 @@ import Bracket from "./bracket";
 import BracketClose from "./bracketClose";
 import { IStackElement } from "./IExtensionGrammar";
 import LineState from "./lineState";
+import Token from "./token";
 
 export default class TextLine {
   public index: number;
@@ -28,7 +29,7 @@ export default class TextLine {
     return this.lineState.getBracketHash();
   }
 
-  public AddToken(currentChar: string, index: number, key: number, open: boolean) {
+  public addBracket(currentChar: string, index: number, key: number, open: boolean) {
     this.lineState.addBracket(key, currentChar, index, this.index, open);
   }
 
@@ -42,5 +43,13 @@ export default class TextLine {
 
   public getAllBrackets(): Bracket[] {
     return this.lineState.getAllBrackets();
+  }
+
+  public addToken(token: Token) {
+    this.lineState.addToken(token);
+  }
+
+  public getAllTokens(): Token[] {
+    return this.lineState.getAllTokens();
   }
 }

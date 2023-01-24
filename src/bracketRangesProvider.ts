@@ -41,10 +41,10 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private async updateFoldingRanges(document: TextDocument) {
-    const allBrackets = await this.bracketsManager.updateDocument(document);
-    if (!allBrackets) return [];
+    const tokenizedDocument = await this.bracketsManager.updateDocument(document);
+    if (!tokenizedDocument) return [];
 
-    const bracketsRanges = bracketsToBracketsRanges(allBrackets);
+    const bracketsRanges = bracketsToBracketsRanges(tokenizedDocument.brackets);
     const foldingRanges = this.bracketsRangesToFoldingRanges(bracketsRanges, document);
 
     return foldingRanges;
@@ -107,7 +107,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private surroundWithBrackets(bracketsRange: BracketsRange, collapsedText: string): string {
-    return `${bracketsRange.startBracket.token.character}${collapsedText}${bracketsRange.endBracket.token.character}`;
+    return `${bracketsRange.startBracket.token.content}${collapsedText}${bracketsRange.endBracket.token.content}`;
   }
 
   private getFoldedLinesCountCollapsedText(bracketsRange: BracketsRange): string {

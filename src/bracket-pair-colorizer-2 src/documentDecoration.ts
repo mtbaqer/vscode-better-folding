@@ -8,6 +8,8 @@ import TextLine from "./textLine";
 import { ignoreBracketsInToken, LineTokens } from "./vscodeFiles";
 import { TextDocumentContentChangeEvent } from "vscode";
 import Bracket from "./bracket";
+import Token from "./token";
+import { TokenizedDocument } from "../types";
 
 export default class DocumentDecoration {
   public readonly settings: Settings;
@@ -93,7 +95,7 @@ export default class DocumentDecoration {
     }
   }
 
-  public tokenizeDocument() {
+  public tokenizeDocument(): TokenizedDocument | undefined {
     // console.log("Tokenizing " + this.document.fileName);
 
     // One document may be shared by multiple editors (side by side view)
@@ -117,10 +119,13 @@ export default class DocumentDecoration {
     }
 
     const brackets: Bracket[] = [];
+    const tokens: Token[] = [];
     for (const line of this.lines) {
       brackets.push(...line.getAllBrackets());
+      tokens.push(...line.getAllTokens());
     }
-    return brackets;
+
+    return { brackets, tokens };
   }
 
   private tokenizeLine(index: number) {
@@ -156,7 +161,7 @@ export default class DocumentDecoration {
     for (const match of matches) {
       const lookup = this.languageConfig.bracketToId.get(match.content);
       if (lookup) {
-        newLine.AddToken(match.content, match.index, lookup.key, lookup.open);
+        newLine.addBracket(match.content, match.index, lookup.key, lookup.open);
       }
     }
     return newLine;
