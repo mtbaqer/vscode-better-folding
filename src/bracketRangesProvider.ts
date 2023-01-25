@@ -153,7 +153,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       column++;
     }
 
-    return paramTokens.join(", ");
+    return paramTokens.length ? paramTokens.join(", ") : "…";
   }
 
   private surroundWithBrackets(bracketsRange: BracketsRange, collapsedText: string): string {
