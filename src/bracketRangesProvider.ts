@@ -15,12 +15,14 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
   private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
 
+  private positionToBracketRange: ExtendedMap<PositionPair, BracketsRange | undefined>;
   private positionToFoldingRange: ExtendedMap<PositionPair, BetterFoldingRange | undefined>;
   private positionToToken: ExtendedMap<PositionPair, Token | undefined>;
 
   constructor() {
     this.documentToFoldingRanges = new ExtendedMap(async () => []);
 
+    this.positionToBracketRange = new ExtendedMap(() => undefined);
     this.positionToFoldingRange = new ExtendedMap(() => undefined);
     this.positionToToken = new ExtendedMap(() => undefined);
 
@@ -60,9 +62,11 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     tokens: Token[],
     document: TextDocument
   ): BetterFoldingRange[] {
+    this.positionToBracketRange.clear();
     this.positionToFoldingRange.clear();
     this.positionToToken.clear();
 
+    this.populatePositionToBracketRangeMap(bracketsRanges);
     this.populatePositionToTokenMap(tokens);
 
     const foldingRanges: BetterFoldingRange[] = [];
@@ -74,6 +78,14 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       this.addToPositionToFoldingRangeMap(foldingRange, document);
     }
     return foldingRanges;
+  }
+
+  private populatePositionToBracketRangeMap(bracketsRanges: BracketsRange[]) {
+    for (const bracketsRange of bracketsRanges) {
+      const line = bracketsRange.start.line;
+      const column = bracketsRange.start.character;
+      this.positionToBracketRange.set([line, column], bracketsRange);
+    }
   }
 
   private populatePositionToTokenMap(tokens: Token[]) {
@@ -141,6 +153,12 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     let column = bracketsRange.start.character + 1;
 
     while (new Position(line, column).isBefore(bracketsRange.end)) {
+      const bracketRange = this.positionToBracketRange.get([line, column]);
+      if (bracketRange?.startBracket.token.content === "(") {
+        column = bracketRange.end.character;
+        line = bracketRange.end.line;
+      }
+
       const token = this.positionToToken.get([line, column]);
       if (token) {
         paramTokens.push(token.content);
