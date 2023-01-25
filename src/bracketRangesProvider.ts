@@ -136,15 +136,14 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getFunctionParamsCollapsedText(bracketsRange: BracketsRange, document: TextDocument): string {
-    let collapsedText = "";
+    const paramTokens: string[] = [];
     let line = bracketsRange.start.line;
     let column = bracketsRange.start.character + 1;
 
     while (new Position(line, column).isBefore(bracketsRange.end)) {
       const token = this.positionToToken.get([line, column]);
       if (token) {
-        collapsedText += token.content;
-        collapsedText += ", ";
+        paramTokens.push(token.content);
         column = token.range.end.character;
       }
       if (column >= document.lineAt(line).text.length) {
@@ -154,8 +153,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
       column++;
     }
 
-    //remove last ", "
-    return collapsedText.slice(0, -2);
+    return paramTokens.join(", ");
   }
 
   private surroundWithBrackets(bracketsRange: BracketsRange, collapsedText: string): string {
