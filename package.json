@@ -52,6 +52,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Shows the function parameters in the collapsed text for functions with params in multiple lines. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nExample: `function example(firstParam, secondParam) {…}`."
+        },
+        "betterFolding.chainFoldingRanges": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show the collapsed text of the folding ranges located after the first folding range. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nEnabled: `function example(…) {…}`. \n\nDisabled: `function example(…) {`."
         }
       }
     }

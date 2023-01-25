@@ -25,3 +25,7 @@ export function showOnlyRegionsDescriptions() {
 export function showFunctionParameters() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFunctionParameters") && showFoldedBrackets();
 }
+
+export function chainFoldingRanges() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("chainFoldingRanges") && showFoldedBrackets();
+}
