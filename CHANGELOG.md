@@ -8,6 +8,7 @@ All notable changes to the "better-folding" extension will be documented in this
 
 - Config option to disable chaining of folding ranges.
 - Support for showing function params in folded functions.
+- Support folding generics.
 
 ### Changed
 

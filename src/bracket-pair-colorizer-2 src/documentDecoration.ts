@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import BracketClose from "./bracketClose";
-import { IStackElement } from "./IExtensionGrammar";
+import { IStackElement, IToken } from "./IExtensionGrammar";
 import LanguageConfig from "./languageConfig";
 import LineState from "./lineState";
 import Settings from "./settings";
@@ -135,29 +135,37 @@ export default class DocumentDecoration {
     const previousLineState =
       index > 0 ? this.lines[index - 1].cloneState() : new LineState(this.settings, this.languageConfig);
 
-    const tokenized = this.languageConfig.grammar.tokenizeLine2(newText, previousLineRuleStack);
+    //Don't judge, I'm just following the style of the original code
+    const tokenized = this.languageConfig.grammar.tokenizeLine(newText, previousLineRuleStack);
     const tokens = tokenized.tokens;
-    const lineTokens = new LineTokens(tokens, newText);
+    const startIndexToToken = new Map(tokens.map((token) => [token.startIndex, token]));
+
+    const tokenized2 = this.languageConfig.grammar.tokenizeLine2(newText, previousLineRuleStack);
+    const tokens2 = tokenized2.tokens;
+    const lineTokens = new LineTokens(tokens2, newText);
 
     const matches = new Array<{ content: string; index: number }>();
     const count = lineTokens.getCount();
     for (let i = 0; i < count; i++) {
       const tokenType = lineTokens.getStandardTokenType(i);
       if (!ignoreBracketsInToken(tokenType)) {
-        const searchStartOffset = tokens[i * 2];
-        const searchEndOffset = i < count ? tokens[(i + 1) * 2] : newText.length;
+        const searchStartOffset = tokens2[i * 2];
+        const searchEndOffset = i < count ? tokens2[(i + 1) * 2] : newText.length;
 
         const currentTokenText = newText.substring(searchStartOffset, searchEndOffset);
 
         let result: RegExpExecArray | null;
-        // tslint:disable-next-line:no-conditional-assignment
+        const genericRegex = /<|>/g;
         while ((result = this.languageConfig.regex.exec(currentTokenText)) !== null) {
-          matches.push({ content: result[0], index: result.index + searchStartOffset });
+          const content = result[0];
+          if (genericRegex.test(content) && !this.isGenericBracket(result, startIndexToToken)) continue;
+
+          matches.push({ content, index: result.index + searchStartOffset });
         }
       }
     }
 
-    const newLine = new TextLine(tokenized.ruleStack, previousLineState, index);
+    const newLine = new TextLine(tokenized2.ruleStack, previousLineState, index);
     for (const match of matches) {
       const lookup = this.languageConfig.bracketToId.get(match.content);
       if (lookup) {
@@ -165,21 +173,23 @@ export default class DocumentDecoration {
       }
     }
 
-    const paramsTokens = this.getFunctionParametersTokens(index, newText, previousLineRuleStack);
+    const paramsTokens = this.getFunctionParametersTokens(index, newText, tokens);
     for (const token of paramsTokens) newLine.addToken(token);
 
     return newLine;
   }
 
-  private getFunctionParametersTokens(
-    lineIndex: number,
-    text: string,
-    previousLineRuleStack: IStackElement | undefined
-  ): Token[] {
-    const paramsTokens: Token[] = [];
+  private isGenericBracket(result: RegExpExecArray, startIndexToToken: Map<number, IToken>): boolean {
+    const content = result[0];
+    const token = startIndexToToken.get(result.index);
+    return Boolean(
+      (content === "<" && token?.scopes.at(-1)?.startsWith("punctuation.definition.typeparameters.begin")) ||
+        (content === ">" && token?.scopes.at(-1)?.startsWith("punctuation.definition.typeparameters.end"))
+    );
+  }
 
-    const tokenized = this.languageConfig.grammar.tokenizeLine(text, previousLineRuleStack);
-    const tokens = tokenized.tokens;
+  private getFunctionParametersTokens(lineIndex: number, text: string, tokens: IToken[]): Token[] {
+    const paramsTokens: Token[] = [];
 
     for (let token of tokens) {
       if (token.scopes.find((scope) => scope.startsWith("variable.parameter"))) {

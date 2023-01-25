@@ -85,9 +85,9 @@ export class TextMateLoader {
       ).then((grammar) => {
         if (grammar) {
           if (!this.languageConfigs.has(languageID)) {
-            const mappedBrackets = brackets
-              .map((b) => ({ open: b[0], close: b[1] }))
-              .filter((e) => e.open !== "<" && e.close !== ">");
+            brackets.push(["<", ">"]);
+
+            const mappedBrackets = brackets.map((b) => ({ open: b[0], close: b[1] }));
 
             if (mappedBrackets.length === 0) {
               return;
