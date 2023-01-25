@@ -38,39 +38,46 @@
       "title": "Better Folding",
       "properties": {
         "betterFolding.foldClosingBrackets": {
+          "order": 1,
           "type": "boolean",
           "default": true,
           "markdownDescription": "Include closing brackets like `}` and `]` in the folding range."
         },
         "betterFolding.showFoldedBodyLinesCount": {
+          "order": 2,
           "type": "boolean",
           "default": true,
           "markdownDescription": "Shows the number of lines folded, excluding the closing bracket line. \n\nExample: `function example() { ⋯ 3 lines ⋯ `"
         },
         "betterFolding.showFoldedBrackets": {
+          "order": 3,
           "type": "boolean",
           "default": true,
           "markdownDescription": "Shows brackets like `{` and `}` in the collapsed text. Only applies if `#betterFolding.foldClosingBrackets#` is `enabled`. \n\nExample: `function example() {…}`."
         },
-        "betterFolding.excludedLanguages": {
-          "type": "array",
-          "default": [],
-          "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
-        },
-        "betterFolding.showOnlyRegionsDescriptions": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Only shows the region description in the collapsed text. \n\nExample: `// #region some text`.\n\nBecomes: `some text`."
-        },
         "betterFolding.showFunctionParameters": {
+          "order": 4,
           "type": "boolean",
           "default": true,
           "markdownDescription": "Shows the function parameters in the collapsed text for functions with params in multiple lines. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nExample: `function example(firstParam, secondParam) {…}`."
         },
         "betterFolding.chainFoldingRanges": {
+          "order": 5,
           "type": "boolean",
           "default": true,
           "markdownDescription": "On folding a range, fold all the ranges that start on the same line where the original range ends. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nEnabled: `function example(…) {…}`. \n\nDisabled: `function example(…) {`."
+        },
+        "betterFolding.showOnlyRegionsDescriptions": {
+          "order": 6,
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Only shows the region description in the collapsed text. \n\nExample: `// #region some text`.\n\nBecomes: `some text`."
+        },
+        "betterFolding.excludedLanguages": {
+          "order": 7,
+          "type": "array",
+          "default": [],
+          "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
         }
       }
     }
