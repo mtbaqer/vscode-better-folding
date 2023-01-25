@@ -18,6 +18,20 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "keywords": [
+    "folding",
+    "fold",
+    "collapsing",
+    "collapse",
+    "same line",
+    "hide",
+    "block",
+    "blocks",
+    "marker",
+    "bracket",
+    "brackets",
+    "vscode"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
