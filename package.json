@@ -56,7 +56,7 @@
         "betterFolding.chainFoldingRanges": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Show the collapsed text of the folding ranges located after the first folding range. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nEnabled: `function example(…) {…}`. \n\nDisabled: `function example(…) {`."
+          "markdownDescription": "On folding a range, fold all the ranges that start on the same line where the original range ends. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nEnabled: `function example(…) {…}`. \n\nDisabled: `function example(…) {`."
         }
       }
     }
