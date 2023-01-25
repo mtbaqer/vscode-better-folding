@@ -155,10 +155,10 @@ export default class DocumentDecoration {
         const currentTokenText = newText.substring(searchStartOffset, searchEndOffset);
 
         let result: RegExpExecArray | null;
-        const genericRegex = /<|>/g;
+        const isAngleBracket = (content: string) => content === "<" || content === ">";
         while ((result = this.languageConfig.regex.exec(currentTokenText)) !== null) {
           const content = result[0];
-          if (genericRegex.test(content) && !this.isGenericBracket(result, startIndexToToken)) continue;
+          if (isAngleBracket(content) && !this.isGenericBracket(result, startIndexToToken)) continue;
 
           matches.push({ content, index: result.index + searchStartOffset });
         }
