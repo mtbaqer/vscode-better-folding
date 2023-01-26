@@ -7,7 +7,7 @@ import * as config from "./configuration";
 export default class JsxRangesProvider implements BetterFoldingRangeProvider {
   private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
 
-  public provideFoldingRanges(
+  public async provideFoldingRanges(
     document: TextDocument,
     context?: FoldingContext | undefined,
     token?: CancellationToken | undefined,
@@ -16,11 +16,12 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     if (useCachedRanges) return this.foldingRanges;
 
     const jsxElements: JSXElement[] = [];
-    const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
-    this.visit(ast, jsxElements);
+    try {
+      const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
+      this.visit(ast, jsxElements);
 
-    const foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
-    this.foldingRanges = Promise.resolve(foldingRanges);
+      this.foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
+    } catch (e) {}
 
     return this.foldingRanges;
   }
@@ -50,7 +51,10 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     return node.type === "JSXElement";
   }
 
-  private jsxElementsToFoldingRanges(jsxElements: JSXElement[], document: TextDocument): BetterFoldingRange[] {
+  private async jsxElementsToFoldingRanges(
+    jsxElements: JSXElement[],
+    document: TextDocument
+  ): Promise<BetterFoldingRange[]> {
     const foldingRanges: BetterFoldingRange[] = [];
 
     const foldClosingTags = config.foldClosingTags();

@@ -31,8 +31,8 @@ export function activate(context: ExtensionContext) {
 
     workspace.onDidChangeTextDocument((e) => {
       if (e.contentChanges.length > 0) {
-        bracketRangesProvider.provideFoldingRanges(e.document);
         jsxRangesProvider.provideFoldingRanges(e.document);
+        bracketRangesProvider.provideFoldingRanges(e.document);
       }
     }),
 
