@@ -5,19 +5,24 @@ import { JSXElement, BaseNode } from "@typescript-eslint/types/dist/generated/as
 import * as config from "./configuration";
 
 export default class JsxRangesProvider implements BetterFoldingRangeProvider {
+  private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
+
   public provideFoldingRanges(
     document: TextDocument,
     context?: FoldingContext | undefined,
     token?: CancellationToken | undefined,
     useCachedRanges?: boolean | undefined
   ): Promise<BetterFoldingRange[]> {
+    if (useCachedRanges) return this.foldingRanges;
+
     const jsxElements: JSXElement[] = [];
     const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
     this.visit(ast, jsxElements);
 
     const foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
+    this.foldingRanges = Promise.resolve(foldingRanges);
 
-    return Promise.resolve(foldingRanges);
+    return this.foldingRanges;
   }
 
   private visit(node: unknown, jsxElements: JSXElement[]) {
