@@ -1,11 +1,17 @@
-import { TextDocument, FoldingContext, CancellationToken, Range } from "vscode";
+import { TextDocument, FoldingContext, CancellationToken, Range, Uri } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import { parse } from "@typescript-eslint/typescript-estree";
 import { JSXElement, BaseNode } from "@typescript-eslint/types/dist/generated/ast-spec";
 import * as config from "./configuration";
+import ExtendedMap from "./utils/classes/extendedMap";
 
 export default class JsxRangesProvider implements BetterFoldingRangeProvider {
-  private foldingRanges: Promise<BetterFoldingRange[]> = Promise.resolve([]);
+  //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
+  private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
+
+  constructor() {
+    this.documentToFoldingRanges = new ExtendedMap(async () => []);
+  }
 
   public async provideFoldingRanges(
     document: TextDocument,
@@ -13,17 +19,20 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     token?: CancellationToken | undefined,
     useCachedRanges?: boolean | undefined
   ): Promise<BetterFoldingRange[]> {
-    if (useCachedRanges) return this.foldingRanges;
+    if (useCachedRanges) {
+      return this.documentToFoldingRanges.get(document.uri);
+    }
 
     const jsxElements: JSXElement[] = [];
     try {
       const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
       this.visit(ast, jsxElements);
 
-      this.foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
+      const foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
+      this.documentToFoldingRanges.set(document.uri, foldingRanges);
     } catch (e) {}
 
-    return this.foldingRanges;
+    return this.documentToFoldingRanges.get(document.uri)!;
   }
 
   private visit(node: unknown, jsxElements: JSXElement[]) {
