@@ -9,7 +9,7 @@ export function groupArrayToMap<T, V>(array: T[], getValue: (element: T) => V, d
 
   for (const element of array) {
     const value = getValue(element) ?? defaultValue;
-    if (!value) continue;
+    if (value === undefined || value === null) continue;
 
     const valueCollection = map.get(value);
     if (!valueCollection) {

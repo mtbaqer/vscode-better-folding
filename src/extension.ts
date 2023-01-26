@@ -4,10 +4,15 @@ import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
 import * as config from "./configuration";
 import RegionRangesProvider from "./regionRangesProvider";
+import JsxRangesProvider from "./jsxRangesProvider";
 
 const bracketRangesProvider = new BracketRangesProvider();
 const regionProvider = new RegionRangesProvider();
+const jsxRangesProvider = new JsxRangesProvider();
 let foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
+
+foldingDecorator.registerFoldingRangeProvider("javascriptreact", jsxRangesProvider);
+foldingDecorator.registerFoldingRangeProvider("typescriptreact", jsxRangesProvider);
 
 const registeredLanguages = new Set<string>();
 
@@ -50,6 +55,9 @@ function registerProviders(context: ExtensionContext, delay = 0) {
 
       setTimeout(() => {
         context.subscriptions.push(languages.registerFoldingRangeProvider(languageId, bracketRangesProvider));
+        if (languageId === "javascriptreact" || languageId === "typescriptreact") {
+          context.subscriptions.push(languages.registerFoldingRangeProvider(languageId, jsxRangesProvider));
+        }
       }, delay);
     }
   }
@@ -68,6 +76,9 @@ function restart() {
 
   foldingDecorator.dispose();
   foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
+
+  foldingDecorator.registerFoldingRangeProvider("javascriptreact", jsxRangesProvider);
+  foldingDecorator.registerFoldingRangeProvider("typescriptreact", jsxRangesProvider);
 }
 
 export function deactivate() {
