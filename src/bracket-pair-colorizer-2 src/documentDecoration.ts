@@ -192,11 +192,17 @@ export default class DocumentDecoration {
     const paramsTokens: Token[] = [];
 
     for (let token of tokens) {
-      if (token.scopes.find((scope) => scope.startsWith("variable.parameter"))) {
+      const isAVariableParameter = token.scopes.find((scope) => scope.startsWith("variable.parameter"));
+      const isAFunctionParameter =
+        token.scopes.find((scope) => scope.startsWith("entity.name.function")) &&
+        !token.scopes.find((scope) => scope.startsWith("meta.function-call"));
+
+      if (isAVariableParameter || isAFunctionParameter) {
         const content = text.substring(token.startIndex, token.endIndex);
         paramsTokens.push(new Token(-1, content, token.startIndex, lineIndex));
       }
     }
+
     return paramsTokens;
   }
 
