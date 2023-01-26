@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.2.1] - 2023-01-26
+
+### Changed
+
+- Made JSX and TSX show up faster on switching between tabs by caching the ranges per document.
+
+### Fixed
+
+- Fixed JSX and TSX ranges unfolding in case of invalid syntax somewhere else in the file.
+
+
 ## [0.2.0] - 2023-01-26
 
 ### Added
