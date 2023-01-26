@@ -91,7 +91,7 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     const hasAttributes = jsxElement.openingElement.attributes.length > 0;
 
     const foldClosingTags = config.foldClosingTags();
-    const { start, end } = jsxElement.openingElement.loc;
+    const { start, end } = jsxElement.closingElement.loc;
     const closingElementRange = new Range(start.line - 1, start.column, end.line - 1, end.column);
     const closingElementText = document.getText(closingElementRange);
 
