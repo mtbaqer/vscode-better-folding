@@ -101,6 +101,10 @@ Shows brackets like `{` and `}` in the collapsed text.
 - If a folding range is at the end of the file, sometimes it would fold the start line while scrolling. Again, this is an issue with VS Code API, will submit an issue to their repo soon.
 - The cursor can hide behind the folded text. Working on a fix.
 
+## Changelog
+
+See the project's [changelog](https://github.com/mtbaqer/vscode-better-folding/blob/main/CHANGELOG.md) here.
+
 ## Big thanks to these source codes
 [Bracket-Pair-Colorizer-2](https://github.com/CoenraadS/Bracket-Pair-Colorizer-2) (by CoenraadS)
 
