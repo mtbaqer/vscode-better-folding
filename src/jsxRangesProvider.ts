@@ -61,7 +61,13 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
   }
 
   private getStartColumn(jsxElement: JSXElement): number | undefined {
-    return jsxElement.openingElement.name.loc.end.column;
+    const hasAttributes = jsxElement.openingElement.attributes.length > 0;
+    const nameEndColumn = jsxElement.openingElement.name.loc.end.column;
+    const tagEndColumn = jsxElement.openingElement.loc.end.column;
+
+    const startColumn = hasAttributes ? nameEndColumn : tagEndColumn;
+
+    return startColumn;
   }
 
   private getCollapsedText(jsxElement: JSXElement, document: TextDocument): string {
@@ -77,6 +83,8 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     );
 
     const closingElementText = document.getText(closingElementRange);
-    return `>…${closingElementText}`;
+    const hasAttributes = jsxElement.openingElement.attributes.length > 0;
+
+    return `${hasAttributes ? "…>" : ""}…${closingElementText}`;
   }
 }
