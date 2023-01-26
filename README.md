@@ -58,10 +58,28 @@ This is the first release of the extension, so it is not fully battle tested yet
 />
 </p>
 
-## Planned Features
 
-### Folding closing HTML/JSX/TSX tags
-Based on [microsoft/vscode#24515](https://github.com/microsoft/vscode/issues/24515)
+### Show only function parameters names in folded function parentheses
+
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/functionParams.png"
+  alt="Better Folding Extension Function Params Folding Preview"
+/>
+</p>
+
+
+### Folding closing tags (currently JSX and TSX, HTML next)
+
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/foldingTags.png"
+  alt="Better Folding Extension Folding Closing Tags Preview"
+/>
+</p>
+
+
+## Planned Features
 
 ### Show function content for short functions
 Based on [microsoft/vscode#76396](https://github.com/microsoft/vscode/issues/76396)
@@ -69,14 +87,12 @@ Based on [microsoft/vscode#76396](https://github.com/microsoft/vscode/issues/763
 ### Show objects preview
 Based on [microsoft/vscode#168028](https://github.com/microsoft/vscode/issues/168028)
 
-### Show only function arguments names in folded function parentheses
-
-Inspired by [microsoft/pylance-release#3385](https://github.com/microsoft/pylance-release/issues/3385)
-
 ## Supported Languages:
 **Most brackets-based languages:** JavaScript, TypeScript, C, C#, C++, Java, Kotlin, PHP, Go (Golang), Dart, Rust, Swift, CSS, LESS, SCSS and more...
 
-**Work in progress:** HTML, JSX and TSX.
+**XML-based languages:** JSX and TSX.
+
+**Work in progress:** HTML.
 
 ## Settings
 
