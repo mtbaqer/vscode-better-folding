@@ -30,7 +30,10 @@ export function activate(context: ExtensionContext) {
     }),
 
     workspace.onDidChangeTextDocument((e) => {
-      if (e.contentChanges.length > 0) bracketRangesProvider.provideFoldingRanges(e.document);
+      if (e.contentChanges.length > 0) {
+        bracketRangesProvider.provideFoldingRanges(e.document);
+        jsxRangesProvider.provideFoldingRanges(e.document);
+      }
     }),
 
     window.onDidChangeTextEditorVisibleRanges((e) => {
