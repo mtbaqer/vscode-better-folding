@@ -2,6 +2,7 @@ import { TextDocument, FoldingContext, CancellationToken, Range } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import { parse } from "@typescript-eslint/typescript-estree";
 import { JSXElement, BaseNode } from "@typescript-eslint/types/dist/generated/ast-spec";
+import * as config from "./configuration";
 
 export default class JsxRangesProvider implements BetterFoldingRangeProvider {
   public provideFoldingRanges(
@@ -75,16 +76,22 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
       return "…/>";
     }
 
-    const closingElementRange = new Range(
-      jsxElement.closingElement.loc.start.line - 1,
-      jsxElement.closingElement.loc.start.column,
-      jsxElement.closingElement.loc.end.line - 1,
-      jsxElement.closingElement.loc.end.column
-    );
+    let collapsedText = "…";
+    if (config.showFoldedBodyLinesCount()) {
+      collapsedText = this.getFoldedLinesCountCollapsedText(jsxElement);
+    }
+
+    const { start, end } = jsxElement.openingElement.loc;
+    const closingElementRange = new Range(start.line - 1, start.column, end.line - 1, end.column);
 
     const closingElementText = document.getText(closingElementRange);
     const hasAttributes = jsxElement.openingElement.attributes.length > 0;
 
-    return `${hasAttributes ? "…>" : ""}…${closingElementText}`;
+    return (hasAttributes ? "…>" : "") + collapsedText + closingElementText;
+  }
+
+  private getFoldedLinesCountCollapsedText(jsxElement: JSXElement): string {
+    const linesCount = jsxElement.loc.end.line - jsxElement.loc.start.line - 1;
+    return `… ${linesCount} lines …`;
   }
 }
