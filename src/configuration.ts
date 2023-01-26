@@ -6,6 +6,10 @@ export function foldClosingBrackets() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("foldClosingBrackets") ?? false;
 }
 
+export function foldClosingTags() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("foldClosingTags") ?? false;
+}
+
 export function showFoldedBodyLinesCount() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("showFoldedBodyLinesCount") ?? false;
 }

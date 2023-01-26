@@ -43,6 +43,12 @@
           "default": true,
           "markdownDescription": "Include closing brackets like `}` and `]` in the folding range."
         },
+        "betterFolding.foldClosingTags": {
+          "order": 1,
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Include closing tags like `</div>` and `</p>` in the folding range."
+        },
         "betterFolding.showFoldedBodyLinesCount": {
           "order": 2,
           "type": "boolean",

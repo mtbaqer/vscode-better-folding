@@ -48,9 +48,11 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
   private jsxElementsToFoldingRanges(jsxElements: JSXElement[], document: TextDocument): BetterFoldingRange[] {
     const foldingRanges: BetterFoldingRange[] = [];
 
+    const foldClosingTags = config.foldClosingTags();
+
     for (const jsxElement of jsxElements) {
       const start = jsxElement.loc.start.line - 1;
-      const end = jsxElement.loc.end.line - 1;
+      const end = jsxElement.loc.end.line - 1 - (foldClosingTags ? 0 : 1);
 
       const startColumn = this.getStartColumn(jsxElement);
       const collapsedText = this.getCollapsedText(jsxElement, document);
@@ -81,13 +83,14 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
       collapsedText = this.getFoldedLinesCountCollapsedText(jsxElement);
     }
 
-    const { start, end } = jsxElement.openingElement.loc;
-    const closingElementRange = new Range(start.line - 1, start.column, end.line - 1, end.column);
-
-    const closingElementText = document.getText(closingElementRange);
     const hasAttributes = jsxElement.openingElement.attributes.length > 0;
 
-    return (hasAttributes ? "…>" : "") + collapsedText + closingElementText;
+    const foldClosingTags = config.foldClosingTags();
+    const { start, end } = jsxElement.openingElement.loc;
+    const closingElementRange = new Range(start.line - 1, start.column, end.line - 1, end.column);
+    const closingElementText = document.getText(closingElementRange);
+
+    return (hasAttributes ? "…>" : "") + collapsedText + (foldClosingTags ? closingElementText : "");
   }
 
   private getFoldedLinesCountCollapsedText(jsxElement: JSXElement): string {
