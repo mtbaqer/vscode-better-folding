@@ -51,8 +51,8 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
       const start = jsxElement.loc.start.line - 1;
       const end = jsxElement.loc.end.line - 1;
 
-      let startColumn = this.getStartColumn(jsxElement, document);
-      let collapsedText = this.getCollapsedText(jsxElement, document);
+      const startColumn = this.getStartColumn(jsxElement);
+      const collapsedText = this.getCollapsedText(jsxElement, document);
 
       foldingRanges.push({ start, end, startColumn, collapsedText });
     }
@@ -60,9 +60,8 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     return foldingRanges;
   }
 
-  private getStartColumn(jsxElement: JSXElement, document: TextDocument): number | undefined {
-    const nameEndColumn = jsxElement.openingElement.name.loc.end.column;
-    return nameEndColumn;
+  private getStartColumn(jsxElement: JSXElement): number | undefined {
+    return jsxElement.openingElement.name.loc.end.column;
   }
 
   private getCollapsedText(jsxElement: JSXElement, document: TextDocument): string {
