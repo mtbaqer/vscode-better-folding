@@ -1,8 +1,6 @@
 # Change Log
 
-All notable changes to the "better-folding" extension will be documented in this file.
-
-## [0.2.0] - 2023-01-25
+## [0.2.0] - 2023-01-26
 
 ### Added
 
