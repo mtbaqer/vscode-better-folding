@@ -1,9 +1,9 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { IExtensionPackage, IGrammar } from "./IExtensionGrammar";
-import fs = require("fs");
+import * as fs from "fs";
 import { getRegexForBrackets } from "./bracketUtil";
-import JSON5 = require("json5");
+import * as JSON5 from "json5";
 import LanguageConfig from "./languageConfig";
 
 export class TextMateLoader {

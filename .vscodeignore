@@ -10,3 +10,4 @@ vsc-extension-quickstart.md
 **/*.ts
 demo-media/**
 **/.prettierrc.json
+node_modules/**
