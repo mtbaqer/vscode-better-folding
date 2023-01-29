@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.2.2] - 2023-01-29
+
+### Changed
+
+- The bundle size should be much smaller now.
+
+### Fixed
+
+- The extension should now work on Linux, WSL and remote workspaces.
+
+
 ## [0.2.1] - 2023-01-26
 
 ### Changed
