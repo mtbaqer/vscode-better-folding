@@ -42,10 +42,6 @@ export function activate(context: ExtensionContext) {
 
   registerProviders(context, 1000);
   updateAllDocuments();
-
-  const command = "myExtension.sayHello";
-
-  context.subscriptions.push(commands.registerCommand(command, () => foldingDecorator.enableZenMode()));
 }
 
 // Courtesy of vscode-explicit-fold,
