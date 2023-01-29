@@ -1,8 +1,12 @@
 import {
+  commands,
   DecorationRenderOptions,
   Disposable,
+  Position,
   Range,
+  Selection,
   TextDocument,
+  TextDocumentChangeEvent,
   TextEditor,
   TextEditorDecorationType,
   Uri,
@@ -12,6 +16,7 @@ import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/utils";
 import * as config from "./configuration";
+import { BookmarksManager } from "./bookmarksManager";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
@@ -19,6 +24,8 @@ export default class FoldingDecorator extends Disposable {
   timeout: NodeJS.Timer | undefined = undefined;
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
   unfoldedDecoration = window.createTextEditorDecorationType({});
+  zenModeDecoration: TextEditorDecorationType;
+  bookmarksManager = new BookmarksManager();
 
   decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
   cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
@@ -26,6 +33,7 @@ export default class FoldingDecorator extends Disposable {
   constructor(universalProviders: BetterFoldingRangeProvider[]) {
     super(() => this.dispose());
     this.providers["*"] = [...universalProviders];
+    this.zenModeDecoration = window.createTextEditorDecorationType(this.newDecorationOption(DEFAULT_COLLAPSED_TEXT));
   }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {
@@ -34,6 +42,46 @@ export default class FoldingDecorator extends Disposable {
     }
 
     this.providers[selector].push(provider);
+  }
+
+  //TODO: move all zen related things to a separate class.
+  public onChange(change: TextDocumentChangeEvent) {
+    this.bookmarksManager.onChange(change);
+  }
+
+  public async enableZenMode() {
+    const editor = window.activeTextEditor;
+    if (!editor) return;
+    const { document } = editor;
+
+    const selection = editor.selection;
+    const aboveSelectionLine = selection.start.line - 1;
+    const belowSelectionLine = selection.end.line + 1;
+
+    const documentStart = new Position(0, 0);
+    const aboveSelection = new Position(aboveSelectionLine, document.lineAt(aboveSelectionLine).text.length);
+    const belowSelection = new Position(belowSelectionLine, document.lineAt(belowSelectionLine).text.length);
+    const documentEnd = new Position(document.lineCount, 0);
+
+    editor.selections = [new Selection(documentStart, aboveSelection), new Selection(documentEnd, belowSelection)];
+
+    const firstLineRange = new Range(0, 0, 0, document.lineAt(0).text.length);
+    const belowSelectionLineRange = new Range(
+      belowSelectionLine,
+      0,
+      belowSelectionLine,
+      document.lineAt(belowSelectionLine).text.length
+    );
+
+    editor.setDecorations(this.zenModeDecoration, [firstLineRange, belowSelectionLineRange]);
+
+    this.bookmarksManager.bookmarks = [];
+    this.bookmarksManager.addBookmark(editor, documentStart);
+    this.bookmarksManager.addBookmark(editor, belowSelection);
+
+    await commands.executeCommand("editor.createFoldingRangeFromSelection");
+
+    editor.selection = selection;
   }
 
   public triggerUpdateDecorations(editor?: TextEditor) {
@@ -62,6 +110,8 @@ export default class FoldingDecorator extends Disposable {
     const foldingRanges = await this.getRanges(editor.document);
     this.clearDecorations(editor);
 
+    this.updateZenDecorations(editor);
+
     const decorationOptions = this.createDecorationsOptions(foldingRanges);
     const newDecorations = this.applyDecorations(editor, foldingRanges, decorationOptions);
     this.setDecorations(editor, newDecorations);
@@ -73,12 +123,30 @@ export default class FoldingDecorator extends Disposable {
         decoration.dispose();
       }
       editor.setDecorations(this.unfoldedDecoration, []);
+      editor.setDecorations(this.zenModeDecoration, []);
     } else {
       for (const decorations of this.decorations.values()) {
         decorations.forEach((decoration) => decoration.dispose());
       }
       this.unfoldedDecoration.dispose();
+      this.zenModeDecoration.dispose();
     }
+  }
+
+  private updateZenDecorations(editor: TextEditor) {
+    if (!editor.visibleRanges.length) return;
+
+    const zenLines = this.bookmarksManager.bookmarks.map((b) => b.line);
+
+    const lastVisibleLine = editor.visibleRanges[editor.visibleRanges.length - 1].end.line;
+    const cachedFoldedLines = this.getCachedFoldedLines(editor);
+
+    const zenFoldedLines = zenLines.filter((line) => cachedFoldedLines?.includes(line) || line === lastVisibleLine);
+    const decorationRanges = zenFoldedLines.map(
+      (line) => new Range(line, 0, line, editor.document.lineAt(line).text.length)
+    );
+
+    editor.setDecorations(this.zenModeDecoration, decorationRanges);
   }
 
   private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {

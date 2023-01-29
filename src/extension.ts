@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, window, workspace } from "vscode";
+import { commands, ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./bracketRangesProvider";
 import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
@@ -30,10 +30,9 @@ export function activate(context: ExtensionContext) {
     }),
 
     workspace.onDidChangeTextDocument((e) => {
-      if (e.contentChanges.length > 0) {
-        jsxRangesProvider.provideFoldingRanges(e.document);
-        bracketRangesProvider.provideFoldingRanges(e.document);
-      }
+      foldingDecorator.onChange(e);
+      jsxRangesProvider.provideFoldingRanges(e.document);
+      bracketRangesProvider.provideFoldingRanges(e.document);
     }),
 
     window.onDidChangeTextEditorVisibleRanges((e) => {
@@ -43,6 +42,10 @@ export function activate(context: ExtensionContext) {
 
   registerProviders(context, 1000);
   updateAllDocuments();
+
+  const command = "myExtension.sayHello";
+
+  context.subscriptions.push(commands.registerCommand(command, () => foldingDecorator.enableZenMode()));
 }
 
 // Courtesy of vscode-explicit-fold,

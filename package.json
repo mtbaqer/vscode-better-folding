@@ -84,7 +84,13 @@
           "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "myExtension.sayHello",
+        "title": "Say Hello"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
@@ -114,6 +120,7 @@
   },
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^5.49.0",
-    "json5": "^2.2.3"
+    "json5": "^2.2.3",
+    "vscode-languageserver-protocol": "^3.17.2"
   }
 }
