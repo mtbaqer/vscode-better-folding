@@ -40,7 +40,7 @@ export function activate(context: ExtensionContext) {
     })
   );
 
-  registerProviders(context, 1000);
+  registerProviders(context, 2000);
   updateAllDocuments();
 
   //TODO: clean this up.
