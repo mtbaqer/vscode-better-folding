@@ -49,7 +49,7 @@ export default class FoldingDecorator extends Disposable {
     this.bookmarksManager.onChange(change);
   }
 
-  public async enableZenMode() {
+  public async enableZenFolding() {
     const editor = window.activeTextEditor;
     if (!editor) return;
     const { document } = editor;

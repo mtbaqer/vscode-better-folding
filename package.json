@@ -2,7 +2,7 @@
   "name": "better-folding",
   "displayName": "Better Folding",
   "description": "Improve the folding experience in VS Code",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -84,7 +84,13 @@
           "markdownDescription": "List of languages to exclude from folding. \n\nExample: `['javascript', 'typescript']`."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "betterFolding.enableZenFolding",
+        "title": "Enable Zen Folding"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",

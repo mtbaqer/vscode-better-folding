@@ -42,6 +42,9 @@ export function activate(context: ExtensionContext) {
 
   registerProviders(context, 1000);
   updateAllDocuments();
+
+  const command = "betterFolding.enableZenFolding";
+  context.subscriptions.push(commands.registerCommand(command, () => foldingDecorator.enableZenFolding()));
 }
 
 // Courtesy of vscode-explicit-fold,

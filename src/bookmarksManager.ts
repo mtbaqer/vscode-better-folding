@@ -42,7 +42,6 @@ export class Bookmark {
       // in the newText.
       const linesReplaced = r.end.line - r.start.line;
       const lineDelta = this.countLines(newText) - linesReplaced;
-      console.log(lineDelta);
 
       let charDelta = 0;
 
@@ -114,10 +113,6 @@ export class BookmarksManager implements Disposable {
   }
 
   onChange(change: TextDocumentChangeEvent) {
-    console.log(change.contentChanges);
-
-    console.log(this.bookmarks.length);
-
     const uri = change.document.uri.toString();
     const documentLocal = this.bookmarks.filter((i) => i.uri === uri);
     if (documentLocal.length === 0) {
@@ -161,7 +156,6 @@ export class BookmarksManager implements Disposable {
     if (removed.length > 0) {
       this.remove(removed);
     }
-    console.log(this.bookmarks.length);
   }
 
   private remove(removed: Bookmark[]) {
