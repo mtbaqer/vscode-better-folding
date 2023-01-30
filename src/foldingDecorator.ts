@@ -84,6 +84,22 @@ export default class FoldingDecorator extends Disposable {
     editor.selection = selection;
   }
 
+  public async disableZenFolding() {
+    const editor = window.activeTextEditor;
+    if (!editor) return;
+
+    const selection = editor.selection;
+
+    const manualFoldsSelections = this.bookmarksManager.bookmarks.map((b) => new Selection(b.line, 0, b.line, 0));
+    editor.selections = manualFoldsSelections;
+    await commands.executeCommand("editor.removeManualFoldingRanges");
+    this.bookmarksManager.bookmarks = [];
+    editor.setDecorations(this.zenModeDecoration, []);
+
+    editor.selection = selection;
+    await commands.executeCommand("revealLine", { lineNumber: selection.start.line, at: "center" });
+  }
+
   public triggerUpdateDecorations(editor?: TextEditor) {
     if (!this.timeout) {
       this.updateDecorations(editor);

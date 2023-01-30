@@ -88,7 +88,11 @@
     "commands": [
       {
         "command": "betterFolding.enableZenFolding",
-        "title": "Enable Zen Folding"
+        "title": "Better Folding: Enable Zen Folding"
+      },
+      {
+        "command": "betterFolding.disableZenFolding",
+        "title": "Better Folding: Disable Zen Folding"
       }
     ]
   },
