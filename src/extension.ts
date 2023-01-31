@@ -44,11 +44,13 @@ export function activate(context: ExtensionContext) {
   updateAllDocuments();
 
   //TODO: clean this up.
-  const enableZenFolding = "betterFolding.enableZenFolding";
-  context.subscriptions.push(commands.registerCommand(enableZenFolding, () => foldingDecorator.enableZenFolding()));
+  const createZenFoldsAroundSelection = "betterFolding.createZenFoldsAroundSelection";
+  context.subscriptions.push(
+    commands.registerCommand(createZenFoldsAroundSelection, () => foldingDecorator.createZenFoldsAroundSelection())
+  );
 
-  const disableZenFolding = "betterFolding.disableZenFolding";
-  context.subscriptions.push(commands.registerCommand(disableZenFolding, () => foldingDecorator.disableZenFolding()));
+  const clearZenFolds = "betterFolding.clearZenFolds";
+  context.subscriptions.push(commands.registerCommand(clearZenFolds, () => foldingDecorator.clearZenFolds()));
 }
 
 // Courtesy of vscode-explicit-fold,

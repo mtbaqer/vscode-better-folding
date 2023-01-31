@@ -49,7 +49,7 @@ export default class FoldingDecorator extends Disposable {
     this.bookmarksManager.onChange(change);
   }
 
-  public async enableZenFolding() {
+  public async createZenFoldsAroundSelection() {
     const editor = window.activeTextEditor;
     if (!editor) return;
     const { document } = editor;
@@ -62,7 +62,7 @@ export default class FoldingDecorator extends Disposable {
       const firstLine = 0;
       let lastLine = originalSelection.start.line - 1;
 
-      //If the last line is empty, selection need to go to the start of the next line to include it.
+      //If the last line is empty, selection needs to go to the start of the next line to include it.
       let selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
       if (document.lineAt(lastLine).text.length === 0) {
         lastLine++;
@@ -82,7 +82,6 @@ export default class FoldingDecorator extends Disposable {
 
     editor.selections = selectionsToFold;
 
-    this.bookmarksManager.bookmarks = [];
     for (const selection of selectionsToFold) {
       const firstLine = selection.start.line;
       const endOfFirstLinePosition = new Position(firstLine, document.lineAt(firstLine).text.length + 1);
@@ -94,7 +93,7 @@ export default class FoldingDecorator extends Disposable {
     editor.selection = originalSelection;
   }
 
-  public async disableZenFolding() {
+  public async clearZenFolds() {
     const editor = window.activeTextEditor;
     if (!editor) return;
 

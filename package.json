@@ -87,12 +87,12 @@
     },
     "commands": [
       {
-        "command": "betterFolding.enableZenFolding",
-        "title": "Better Folding: Enable Zen Folding"
+        "command": "betterFolding.createZenFoldsAroundSelection",
+        "title": "Better Folding: Create Zen Folds Around Selection"
       },
       {
-        "command": "betterFolding.disableZenFolding",
-        "title": "Better Folding: Disable Zen Folding"
+        "command": "betterFolding.clearZenFolds",
+        "title": "Better Folding: Clear Zen Folds"
       }
     ]
   },
