@@ -1,5 +1,15 @@
 # Change Log
 
+## [0.3.0] - 2023-01-31
+
+### Added
+
+- Two new commands, `Create Zen Folds Around Selection` and `Clear Zen Folds`. Zen folds are folds that hide everything expect the selected lines. They are useful for hiding code that is not relevant to the current task.
+
+### Fixed
+
+- Fixed a bug where the including the closing brackets would not work on some Windows 10 machines.
+
 ## [0.2.2] - 2023-01-29
 
 ### Changed
