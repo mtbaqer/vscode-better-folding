@@ -12,7 +12,7 @@ Better Folding provides many commonly requested folding-related features all tog
 
 <p align="center">
 <img
-  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/Preview.png"
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/Preview.gif"
   alt="Better Folding Extension Preview"
 />
 </p>
@@ -75,6 +75,15 @@ This is the first release of the extension, so it is not fully battle tested yet
 <img
   src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/foldingTags.png"
   alt="Better Folding Extension Folding Closing Tags Preview"
+/>
+</p>
+
+### Zen Folding
+
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/zenFolding.gif"
+  alt="Better Folding Extension Zen Folding Preview"
 />
 </p>
 
