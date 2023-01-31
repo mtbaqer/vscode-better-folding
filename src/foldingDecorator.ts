@@ -24,7 +24,7 @@ export default class FoldingDecorator extends Disposable {
   timeout: NodeJS.Timer | undefined = undefined;
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
   unfoldedDecoration = window.createTextEditorDecorationType({});
-  zenModeDecoration: TextEditorDecorationType;
+  zenFoldingDecoration: TextEditorDecorationType;
   bookmarksManager = new BookmarksManager();
 
   decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
@@ -33,7 +33,7 @@ export default class FoldingDecorator extends Disposable {
   constructor(universalProviders: BetterFoldingRangeProvider[]) {
     super(() => this.dispose());
     this.providers["*"] = [...universalProviders];
-    this.zenModeDecoration = window.createTextEditorDecorationType(this.newDecorationOption(DEFAULT_COLLAPSED_TEXT));
+    this.zenFoldingDecoration = window.createTextEditorDecorationType(this.newDecorationOption(DEFAULT_COLLAPSED_TEXT));
   }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {
@@ -54,34 +54,44 @@ export default class FoldingDecorator extends Disposable {
     if (!editor) return;
     const { document } = editor;
 
-    const selection = editor.selection;
-    const aboveSelectionLine = selection.start.line - 1;
-    const belowSelectionLine = selection.end.line + 1;
+    const originalSelection = editor.selection;
 
-    const documentStart = new Position(0, 0);
-    const aboveSelection = new Position(aboveSelectionLine, document.lineAt(aboveSelectionLine).text.length);
-    const belowSelection = new Position(belowSelectionLine, document.lineAt(belowSelectionLine).text.length);
-    const documentEnd = new Position(document.lineCount, 0);
+    const selectionsToFold: Selection[] = [];
 
-    editor.selections = [new Selection(documentStart, aboveSelection), new Selection(documentEnd, belowSelection)];
+    if (originalSelection.start.line > 0) {
+      const firstLine = 0;
+      let lastLine = originalSelection.start.line - 1;
 
-    const firstLineRange = new Range(0, 0, 0, document.lineAt(0).text.length);
-    const belowSelectionLineRange = new Range(
-      belowSelectionLine,
-      0,
-      belowSelectionLine,
-      document.lineAt(belowSelectionLine).text.length
-    );
+      //If the last line is empty, selection need to go to the start of the next line to include it.
+      let selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
+      if (document.lineAt(lastLine).text.length === 0) {
+        lastLine++;
+        selectionAbove = new Selection(firstLine, 0, lastLine, 0);
+      }
 
-    editor.setDecorations(this.zenModeDecoration, [firstLineRange, belowSelectionLineRange]);
+      selectionsToFold.push(selectionAbove);
+    }
+
+    if (originalSelection.end.line < document.lineCount - 1) {
+      const firstLine = originalSelection.end.line + 1;
+      const lastLine = document.lineCount - 1;
+
+      const selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
+      selectionsToFold.push(selectionAbove);
+    }
+
+    editor.selections = selectionsToFold;
 
     this.bookmarksManager.bookmarks = [];
-    this.bookmarksManager.addBookmark(editor, documentStart);
-    this.bookmarksManager.addBookmark(editor, belowSelection);
+    for (const selection of selectionsToFold) {
+      const firstLine = selection.start.line;
+      const endOfFirstLinePosition = new Position(firstLine, document.lineAt(firstLine).text.length + 1);
+      this.bookmarksManager.addBookmark(editor, endOfFirstLinePosition);
+    }
 
     await commands.executeCommand("editor.createFoldingRangeFromSelection");
 
-    editor.selection = selection;
+    editor.selection = originalSelection;
   }
 
   public async disableZenFolding() {
@@ -94,7 +104,7 @@ export default class FoldingDecorator extends Disposable {
     editor.selections = manualFoldsSelections;
     await commands.executeCommand("editor.removeManualFoldingRanges");
     this.bookmarksManager.bookmarks = [];
-    editor.setDecorations(this.zenModeDecoration, []);
+    editor.setDecorations(this.zenFoldingDecoration, []);
 
     editor.selection = selection;
     await commands.executeCommand("revealLine", { lineNumber: selection.start.line, at: "center" });
@@ -139,13 +149,13 @@ export default class FoldingDecorator extends Disposable {
         decoration.dispose();
       }
       editor.setDecorations(this.unfoldedDecoration, []);
-      editor.setDecorations(this.zenModeDecoration, []);
+      editor.setDecorations(this.zenFoldingDecoration, []);
     } else {
       for (const decorations of this.decorations.values()) {
         decorations.forEach((decoration) => decoration.dispose());
       }
       this.unfoldedDecoration.dispose();
-      this.zenModeDecoration.dispose();
+      this.zenFoldingDecoration.dispose();
     }
   }
 
@@ -162,7 +172,7 @@ export default class FoldingDecorator extends Disposable {
       (line) => new Range(line, 0, line, editor.document.lineAt(line).text.length)
     );
 
-    editor.setDecorations(this.zenModeDecoration, decorationRanges);
+    editor.setDecorations(this.zenFoldingDecoration, decorationRanges);
   }
 
   private async getRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
