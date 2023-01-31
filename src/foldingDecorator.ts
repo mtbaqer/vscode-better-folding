@@ -61,20 +61,17 @@ export default class FoldingDecorator extends Disposable {
     if (originalSelection.start.line > 0) {
       const firstLine = 0;
       let lastLine = originalSelection.start.line - 1;
+      while (lastLine > firstLine + 1 && document.lineAt(lastLine).text.length === 0) lastLine--;
 
-      //If the last line is empty, selection needs to go to the start of the next line to include it.
-      let selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
-      if (document.lineAt(lastLine).text.length === 0) {
-        lastLine++;
-        selectionAbove = new Selection(firstLine, 0, lastLine, 0);
-      }
+      const selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
 
       selectionsToFold.push(selectionAbove);
     }
 
     if (originalSelection.end.line < document.lineCount - 1) {
-      const firstLine = originalSelection.end.line + 1;
+      let firstLine = originalSelection.end.line + 1;
       const lastLine = document.lineCount - 1;
+      while (firstLine < lastLine - 1 && document.lineAt(firstLine).text.length === 0) firstLine++;
 
       const selectionAbove = new Selection(firstLine, 0, lastLine, document.lineAt(lastLine).text.length);
       selectionsToFold.push(selectionAbove);
@@ -84,7 +81,7 @@ export default class FoldingDecorator extends Disposable {
 
     for (const selection of selectionsToFold) {
       const firstLine = selection.start.line;
-      const endOfFirstLinePosition = new Position(firstLine, document.lineAt(firstLine).text.length + 1);
+      const endOfFirstLinePosition = new Position(firstLine, document.lineAt(firstLine).text.length);
       this.bookmarksManager.addBookmark(editor, endOfFirstLinePosition);
     }
 
