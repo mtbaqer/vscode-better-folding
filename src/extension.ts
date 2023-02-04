@@ -26,7 +26,7 @@ export function activate(context: ExtensionContext) {
 
     window.onDidChangeVisibleTextEditors(() => {
       updateAllDocuments();
-      registerProviders(context);
+      registerProviders(context, 2000);
     }),
 
     workspace.onDidChangeTextDocument((e) => {
