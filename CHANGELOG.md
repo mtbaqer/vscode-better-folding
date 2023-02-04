@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.3.1] - 2023-02-03
+
+### Fixed
+
+- The extension should now work on Dev Containers. (Thanks to @tom-fletcher).
+- Improve performance for non-jsx languages.
+- Fixed a bug where including the closing brackets would not work sometimes on newly opened tabs with new languages.
+
 ## [0.3.0] - 2023-01-31
 
 ### Added
