@@ -19,6 +19,7 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     token?: CancellationToken | undefined,
     useCachedRanges?: boolean | undefined
   ): Promise<BetterFoldingRange[]> {
+    if (document.languageId !== "javascriptreact" && document.languageId !== "typescriptreact") return [];
     if (useCachedRanges) {
       return this.documentToFoldingRanges.get(document.uri);
     }
