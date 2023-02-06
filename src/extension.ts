@@ -5,6 +5,7 @@ import FoldingDecorator from "./foldingDecorator";
 import * as config from "./configuration";
 import RegionRangesProvider from "./regionRangesProvider";
 import JsxRangesProvider from "./jsxRangesProvider";
+import FoldedLinesManager from "./foldedLinesManager";
 
 const bracketRangesProvider = new BracketRangesProvider();
 const regionProvider = new RegionRangesProvider();
@@ -36,6 +37,7 @@ export function activate(context: ExtensionContext) {
     }),
 
     window.onDidChangeTextEditorVisibleRanges((e) => {
+      FoldedLinesManager.updateFoldedLines(e.textEditor);
       foldingDecorator.triggerUpdateDecorations(e.textEditor);
     })
   );
@@ -78,6 +80,7 @@ function updateAllDocuments() {
   //Delayed since vscode does not provide the right visible ranges right away when opening a new document.
   bracketRangesProvider.updateAllDocuments();
   setTimeout(async () => {
+    FoldedLinesManager.updateAllFoldedLines();
     foldingDecorator.triggerUpdateDecorations();
   }, 500);
 }

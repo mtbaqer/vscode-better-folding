@@ -17,6 +17,7 @@ import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/utils";
 import * as config from "./configuration";
 import { BookmarksManager } from "./bookmarksManager";
+import FoldedLinesManager from "./foldedLinesManager";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
@@ -28,7 +29,6 @@ export default class FoldingDecorator extends Disposable {
   bookmarksManager = new BookmarksManager();
 
   decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
-  cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
 
   constructor(universalProviders: BetterFoldingRangeProvider[]) {
     super(() => this.dispose());
@@ -127,8 +127,6 @@ export default class FoldingDecorator extends Disposable {
   }
 
   private async updateEditorDecorations(editor: TextEditor) {
-    this.cacheFoldedLines(editor.visibleRanges, editor);
-
     const foldingRanges = await this.getRanges(editor.document);
     this.clearDecorations(editor);
 
@@ -161,7 +159,7 @@ export default class FoldingDecorator extends Disposable {
     const zenLines = this.bookmarksManager.bookmarks.map((b) => b.line);
 
     const lastVisibleLine = editor.visibleRanges[editor.visibleRanges.length - 1].end.line;
-    const cachedFoldedLines = this.getCachedFoldedLines(editor);
+    const cachedFoldedLines = FoldedLinesManager.getFoldedLines(editor);
 
     const zenFoldedLines = zenLines.filter((line) => cachedFoldedLines?.includes(line) || line === lastVisibleLine);
     const decorationRanges = zenFoldedLines.map(
@@ -236,7 +234,7 @@ export default class FoldingDecorator extends Disposable {
 
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
-        if (this.isFolded(range, editor)) foldedRanges.push(range);
+        if (FoldedLinesManager.isFolded(range, editor)) foldedRanges.push(range);
         else unfoldedRanges.push(range);
       }
 
@@ -249,74 +247,12 @@ export default class FoldingDecorator extends Disposable {
     return decorations;
   }
 
-  private isFolded(range: Range, editor: TextEditor): boolean {
-    for (const cachedFoldedLine of this.getCachedFoldedLines(editor)) {
-      if (cachedFoldedLine === range.start.line) return true;
-    }
-    return this.checkRangeAtEndOfDocumentCase(range, editor);
-  }
-
-  //TODO: clean this up.
-  //Band-aid fix for now.
-  private checkRangeAtEndOfDocumentCase(range: Range, editor: TextEditor) {
-    const lastLine = editor.document.lineCount - 1;
-    const justBeforeLastLine = lastLine - 1;
-    const rangeAtEndOfDocument = range.end.line === lastLine || range.end.line === justBeforeLastLine;
-
-    const lastVisibleLine = editor.visibleRanges[editor.visibleRanges.length - 1].end.line;
-
-    if (rangeAtEndOfDocument && lastVisibleLine <= range.start.line) {
-      this.getCachedFoldedLines(editor).push(range.start.line);
-      return true;
-    }
-    this.setCachedFoldedLines(
-      editor,
-      this.getCachedFoldedLines(editor).filter((line) => line !== range.start.line)
-    );
-    return false;
-  }
-
-  private cacheFoldedLines(visibleRanges: readonly Range[], editor: TextEditor) {
-    if (visibleRanges.length === 0) return;
-    const cachedLines = this.getCachedFoldedLines(editor);
-    const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
-
-    if (cachedLines.length === 0) {
-      this.setCachedFoldedLines(editor, currentFoldedLines);
-      return;
-    }
-
-    //TODO: Optimize this.
-    //Match the folded lines between editor and cached lines.
-    const newFoldedLines = currentFoldedLines.filter((line) => !cachedLines.includes(line));
-    cachedLines.push(...newFoldedLines);
-    cachedLines.sort((a, b) => a - b);
-
-    //Match the unfolded lines between editor and cached lines.
-    const currentFoldedLinesSet = new Set(currentFoldedLines);
-    const cachedLinesMinusUnfoldedLines = cachedLines.filter(
-      (line) =>
-        currentFoldedLinesSet.has(line) ||
-        line < visibleRanges[0].start.line ||
-        line >= visibleRanges[visibleRanges.length - 1].end.line
-    );
-    this.setCachedFoldedLines(editor, cachedLinesMinusUnfoldedLines);
-  }
-
   private getDecorations(editor: TextEditor): TextEditorDecorationType[] {
     return this.decorations.get(editor.document.uri);
   }
 
   private setDecorations(editor: TextEditor, decorations: TextEditorDecorationType[]) {
     this.decorations.set(editor.document.uri, decorations);
-  }
-
-  private getCachedFoldedLines(editor: TextEditor): number[] {
-    return this.cachedFoldedLines.get(editor.document.uri);
-  }
-
-  private setCachedFoldedLines(editor: TextEditor, lines: number[]) {
-    this.cachedFoldedLines.set(editor.document.uri, lines);
   }
 
   public dispose() {
