@@ -1,6 +1,5 @@
 import {
   commands,
-  Disposable,
   Position,
   Range,
   Selection,
@@ -9,47 +8,28 @@ import {
   TextEditorDecorationType,
   window,
 } from "vscode";
+import BetterFoldingDecorator from "./betterFoldingDecorator";
 import { DEFAULT_COLLAPSED_TEXT } from "./constants";
 import { BookmarksManager } from "./utils/classes/bookmarksManager";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
-import newDecorationOptions from "./utils/functions/newDecorationOptions";
 
-export default class ZenFoldingDecorator extends Disposable {
-  private timeout: NodeJS.Timer | undefined = undefined;
+export default class ZenFoldingDecorator extends BetterFoldingDecorator {
   private zenFoldingDecoration: TextEditorDecorationType;
   private bookmarksManager = new BookmarksManager();
 
   constructor() {
-    super(() => this.dispose());
-    this.zenFoldingDecoration = window.createTextEditorDecorationType(newDecorationOptions(DEFAULT_COLLAPSED_TEXT));
+    super();
+    this.zenFoldingDecoration = window.createTextEditorDecorationType(
+      this.newDecorationOptions(DEFAULT_COLLAPSED_TEXT)
+    );
   }
 
   public onChange(change: TextDocumentChangeEvent) {
     this.bookmarksManager.onChange(change);
   }
 
-  public triggerUpdateDecorations(editor?: TextEditor) {
-    if (!this.timeout) {
-      this.updateDecorations(editor);
-
-      this.timeout = setTimeout(() => {
-        clearTimeout(this.timeout);
-        this.timeout = undefined;
-      }, 100);
-    }
-  }
-
-  private updateDecorations(editor?: TextEditor) {
-    if (editor) this.updateEditorDecorations(editor);
-    else {
-      for (const editor of window.visibleTextEditors) {
-        this.updateEditorDecorations(editor);
-      }
-    }
-  }
-
   //TODO: clean this up
-  private updateEditorDecorations(editor: TextEditor) {
+  protected updateEditorDecorations(editor: TextEditor) {
     editor.setDecorations(this.zenFoldingDecoration, []);
     if (!editor.visibleRanges.length) return;
 
@@ -108,6 +88,7 @@ export default class ZenFoldingDecorator extends Disposable {
     editor.selection = originalSelection;
   }
 
+  //TODO: clean this up
   public async clearZenFolds() {
     const editor = window.activeTextEditor;
     if (!editor) return;

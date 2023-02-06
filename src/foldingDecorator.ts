@@ -1,6 +1,5 @@
 import {
   DecorationRenderOptions,
-  Disposable,
   Range,
   TextDocument,
   TextEditor,
@@ -13,18 +12,16 @@ import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/functions/utils";
 import * as config from "./configuration";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
-import newDecorationOptions from "./utils/functions/newDecorationOptions";
 import { DEFAULT_COLLAPSED_TEXT } from "./constants";
+import BetterFoldingDecorator from "./betterFoldingDecorator";
 
-export default class FoldingDecorator extends Disposable {
-  timeout: NodeJS.Timer | undefined = undefined;
+export default class FoldingDecorator extends BetterFoldingDecorator {
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
+  decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
   unfoldedDecoration = window.createTextEditorDecorationType({});
 
-  decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
-
   constructor(providers: ProvidersList) {
-    super(() => this.dispose());
+    super();
     for (const [selector, provider] of providers) {
       this.registerFoldingRangeProvider(selector, provider);
     }
@@ -38,27 +35,7 @@ export default class FoldingDecorator extends Disposable {
     this.providers[selector].push(provider);
   }
 
-  public triggerUpdateDecorations(editor?: TextEditor) {
-    if (!this.timeout) {
-      this.updateDecorations(editor);
-
-      this.timeout = setTimeout(() => {
-        clearTimeout(this.timeout);
-        this.timeout = undefined;
-      }, 100);
-    }
-  }
-
-  private updateDecorations(editor?: TextEditor) {
-    if (editor) this.updateEditorDecorations(editor);
-    else {
-      for (const editor of window.visibleTextEditors) {
-        this.updateEditorDecorations(editor);
-      }
-    }
-  }
-
-  private async updateEditorDecorations(editor: TextEditor) {
+  protected async updateEditorDecorations(editor: TextEditor) {
     const foldingRanges = await this.getRanges(editor.document);
     this.clearDecorations(editor);
 
@@ -105,7 +82,7 @@ export default class FoldingDecorator extends Disposable {
     for (const foldingRange of foldingRanges) {
       const collapsedText = foldingRange.collapsedText ?? DEFAULT_COLLAPSED_TEXT;
       if (!(collapsedText in decorations)) {
-        decorations[collapsedText] = newDecorationOptions(collapsedText);
+        decorations[collapsedText] = this.newDecorationOptions(collapsedText);
       }
     }
 
