@@ -9,11 +9,10 @@ import {
   TextEditorDecorationType,
   window,
 } from "vscode";
+import { DEFAULT_COLLAPSED_TEXT } from "./constants";
 import { BookmarksManager } from "./utils/classes/bookmarksManager";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
 import newDecorationOptions from "./utils/functions/newDecorationOptions";
-
-const DEFAULT_COLLAPSED_TEXT = "…";
 
 export default class ZenFoldingDecorator extends Disposable {
   private timeout: NodeJS.Timer | undefined = undefined;

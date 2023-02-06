@@ -1,6 +1,5 @@
 import { workspace } from "vscode";
-
-export const CONFIG_ID = "betterFolding";
+import { CONFIG_ID } from "./constants";
 
 export function foldClosingBrackets() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("foldClosingBrackets") ?? false;

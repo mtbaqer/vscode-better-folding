@@ -14,8 +14,7 @@ import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./util
 import * as config from "./configuration";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
 import newDecorationOptions from "./utils/functions/newDecorationOptions";
-
-const DEFAULT_COLLAPSED_TEXT = "…";
+import { DEFAULT_COLLAPSED_TEXT } from "./constants";
 
 export default class FoldingDecorator extends Disposable {
   timeout: NodeJS.Timer | undefined = undefined;

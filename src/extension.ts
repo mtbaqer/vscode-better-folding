@@ -1,6 +1,6 @@
 import { commands, ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./providers/bracketRangesProvider";
-import { CONFIG_ID } from "./configuration";
+import { CLEAR_ZEN_FOLDS_COMMAND, CONFIG_ID, CREATE_ZEN_FOLDS_COMMAND } from "./constants";
 import FoldingDecorator from "./foldingDecorator";
 import * as config from "./configuration";
 import RegionRangesProvider from "./providers/regionRangesProvider";
@@ -44,20 +44,14 @@ export function activate(context: ExtensionContext) {
       FoldedLinesManager.updateFoldedLines(e.textEditor);
       zenFoldingDecorator.triggerUpdateDecorations(e.textEditor);
       foldingDecorator.triggerUpdateDecorations(e.textEditor);
-    })
+    }),
+
+    commands.registerCommand(CREATE_ZEN_FOLDS_COMMAND, () => zenFoldingDecorator.createZenFoldsAroundSelection()),
+    commands.registerCommand(CLEAR_ZEN_FOLDS_COMMAND, () => zenFoldingDecorator.clearZenFolds())
   );
 
   registerProviders(context);
   updateAllDocuments();
-
-  //TODO: clean this up.
-  const createZenFoldsAroundSelection = "betterFolding.createZenFoldsAroundSelection";
-  context.subscriptions.push(
-    commands.registerCommand(createZenFoldsAroundSelection, () => zenFoldingDecorator.createZenFoldsAroundSelection())
-  );
-
-  const clearZenFolds = "betterFolding.clearZenFolds";
-  context.subscriptions.push(commands.registerCommand(clearZenFolds, () => zenFoldingDecorator.clearZenFolds()));
 }
 
 function registerProviders(context: ExtensionContext) {
