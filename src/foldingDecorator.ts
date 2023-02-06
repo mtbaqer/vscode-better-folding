@@ -8,7 +8,7 @@ import {
   Uri,
   window,
 } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
+import { BetterFoldingRange, BetterFoldingRangeProvider, ProvidersList } from "./types";
 import ExtendedMap from "./utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/utils";
 import * as config from "./configuration";
@@ -24,9 +24,11 @@ export default class FoldingDecorator extends Disposable {
 
   decorations: ExtendedMap<Uri, TextEditorDecorationType[]> = new ExtendedMap(() => []);
 
-  constructor(universalProviders: BetterFoldingRangeProvider[]) {
+  constructor(providers: ProvidersList) {
     super(() => this.dispose());
-    this.providers["*"] = [...universalProviders];
+    for (const [selector, provider] of providers) {
+      this.registerFoldingRangeProvider(selector, provider);
+    }
   }
 
   public registerFoldingRangeProvider(selector: string, provider: BetterFoldingRangeProvider) {

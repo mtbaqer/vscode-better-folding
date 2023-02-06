@@ -13,27 +13,25 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     this.documentToFoldingRanges = new ExtendedMap(async () => []);
   }
 
-  public async provideFoldingRanges(
-    document: TextDocument,
-    context?: FoldingContext | undefined,
-    token?: CancellationToken | undefined,
-    useCachedRanges?: boolean | undefined
-  ): Promise<BetterFoldingRange[]> {
-    if (document.languageId !== "javascriptreact" && document.languageId !== "typescriptreact") return [];
-    if (useCachedRanges) {
-      return this.documentToFoldingRanges.get(document.uri);
-    }
+  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
+    return this.documentToFoldingRanges.get(document.uri);
+  }
 
+  public updateRanges(document: TextDocument) {
+    if (document.languageId !== "javascriptreact" && document.languageId !== "typescriptreact") return [];
+    this.documentToFoldingRanges.set(document.uri, this.calculateFoldingRanges(document));
+  }
+
+  private async calculateFoldingRanges(document: TextDocument) {
     const jsxElements: JSXElement[] = [];
     try {
       const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
       this.visit(ast, jsxElements);
 
-      const foldingRanges = this.jsxElementsToFoldingRanges(jsxElements, document);
-      this.documentToFoldingRanges.set(document.uri, foldingRanges);
-    } catch (e) {}
-
-    return this.documentToFoldingRanges.get(document.uri)!;
+      return this.jsxElementsToFoldingRanges(jsxElements, document);
+    } catch (e) {
+      return this.documentToFoldingRanges.get(document.uri);
+    }
   }
 
   private visit(node: unknown, jsxElements: JSXElement[]) {
@@ -116,4 +114,6 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     const linesCount = jsxElement.loc.end.line - jsxElement.loc.start.line - 1;
     return `… ${linesCount} lines …`;
   }
+
+  public restart() {}
 }

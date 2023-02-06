@@ -33,21 +33,15 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     this.bracketsManager.updateAllDocuments();
   }
 
-  public async provideFoldingRanges(
-    document: TextDocument,
-    context?: FoldingContext,
-    token?: CancellationToken,
-    useCachedRanges = false
-  ): Promise<BetterFoldingRange[]> {
-    if (useCachedRanges) {
-      return this.documentToFoldingRanges.get(document.uri);
-    }
-
-    this.documentToFoldingRanges.set(document.uri, this.updateFoldingRanges(document));
-    return this.documentToFoldingRanges.get(document.uri)!;
+  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
+    return this.documentToFoldingRanges.get(document.uri);
   }
 
-  private async updateFoldingRanges(document: TextDocument) {
+  public updateRanges(document: TextDocument) {
+    this.documentToFoldingRanges.set(document.uri, this.calculateFoldingRanges(document));
+  }
+
+  private async calculateFoldingRanges(document: TextDocument) {
     const tokenizedDocument = await this.bracketsManager.updateDocument(document);
     if (!tokenizedDocument) return [];
 

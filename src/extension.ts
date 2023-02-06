@@ -7,15 +7,17 @@ import RegionRangesProvider from "./regionRangesProvider";
 import JsxRangesProvider from "./jsxRangesProvider";
 import FoldedLinesManager from "./foldedLinesManager";
 import ZenFoldingDecorator from "./zenFoldingDecorator";
+import { BetterFoldingRangeProvider, ProvidersList } from "./types";
 
 const bracketRangesProvider = new BracketRangesProvider();
-const regionProvider = new RegionRangesProvider();
-const jsxRangesProvider = new JsxRangesProvider();
-let foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
+const providers: ProvidersList = [
+  ["*", bracketRangesProvider],
+  ["*", new RegionRangesProvider()],
+  ["javascriptreact", new JsxRangesProvider()],
+  ["typescriptreact", new JsxRangesProvider()],
+];
 
-foldingDecorator.registerFoldingRangeProvider("javascriptreact", jsxRangesProvider);
-foldingDecorator.registerFoldingRangeProvider("typescriptreact", jsxRangesProvider);
-
+let foldingDecorator = new FoldingDecorator(providers);
 let zenFoldingDecorator = new ZenFoldingDecorator();
 
 const registeredLanguages = new Set<string>();
@@ -30,13 +32,12 @@ export function activate(context: ExtensionContext) {
 
     window.onDidChangeVisibleTextEditors(() => {
       updateAllDocuments();
-      registerProviders(context, 2000);
+      registerProviders(context);
     }),
 
     workspace.onDidChangeTextDocument((e) => {
       zenFoldingDecorator.onChange(e);
-      jsxRangesProvider.provideFoldingRanges(e.document);
-      bracketRangesProvider.provideFoldingRanges(e.document);
+      providers.forEach(([_, provider]) => provider.updateRanges(e.document));
     }),
 
     window.onDidChangeTextEditorVisibleRanges((e) => {
@@ -46,7 +47,7 @@ export function activate(context: ExtensionContext) {
     })
   );
 
-  registerProviders(context, 2000);
+  registerProviders(context);
   updateAllDocuments();
 
   //TODO: clean this up.
@@ -59,9 +60,7 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(commands.registerCommand(clearZenFolds, () => zenFoldingDecorator.clearZenFolds()));
 }
 
-// Courtesy of vscode-explicit-fold,
-// apparently if you delay the folding provider by a second, it can override the default language folding provider.
-function registerProviders(context: ExtensionContext, delay = 0) {
+function registerProviders(context: ExtensionContext) {
   const excludedLanguages = config.excludedLanguages();
 
   for (const editor of window.visibleTextEditors) {
@@ -70,20 +69,28 @@ function registerProviders(context: ExtensionContext, delay = 0) {
     if (!registeredLanguages.has(languageId) && !excludedLanguages.includes(languageId)) {
       registeredLanguages.add(languageId);
 
-      setTimeout(() => {
-        context.subscriptions.push(languages.registerFoldingRangeProvider(languageId, bracketRangesProvider));
-        if (languageId === "javascriptreact" || languageId === "typescriptreact") {
-          context.subscriptions.push(languages.registerFoldingRangeProvider(languageId, jsxRangesProvider));
-        }
-      }, delay);
+      for (const [selector, provider] of providers) {
+        if (selector === languageId || selector === "*") registerProvider(context, languageId, provider);
+      }
     }
   }
+}
+
+// Courtesy of vscode-explicit-fold,
+// apparently if you delay the folding provider by a second, it can override the default language folding provider.
+function registerProvider(context: ExtensionContext, selector: string, provider: BetterFoldingRangeProvider) {
+  setTimeout(() => {
+    context.subscriptions.push(languages.registerFoldingRangeProvider(selector, provider));
+  }, 2000);
 }
 
 function updateAllDocuments() {
   //Delayed since vscode does not provide the right visible ranges right away when opening a new document.
   bracketRangesProvider.updateAllDocuments();
   setTimeout(async () => {
+    for (const e of window.visibleTextEditors) {
+      providers.forEach(([_, provider]) => provider.updateRanges(e.document));
+    }
     FoldedLinesManager.updateAllFoldedLines();
     zenFoldingDecorator.triggerUpdateDecorations();
     foldingDecorator.triggerUpdateDecorations();
@@ -91,13 +98,10 @@ function updateAllDocuments() {
 }
 
 function restart() {
-  bracketRangesProvider.restart();
+  providers.forEach(([_, provider]) => provider.restart());
 
   foldingDecorator.dispose();
-  foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvider]);
-
-  foldingDecorator.registerFoldingRangeProvider("javascriptreact", jsxRangesProvider);
-  foldingDecorator.registerFoldingRangeProvider("typescriptreact", jsxRangesProvider);
+  foldingDecorator = new FoldingDecorator(providers);
 }
 
 export function deactivate() {

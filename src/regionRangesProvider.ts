@@ -1,16 +1,27 @@
-import { TextDocument, FoldingContext, CancellationToken, FoldingRangeKind } from "vscode";
+import { TextDocument, FoldingContext, CancellationToken, FoldingRangeKind, Uri } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
 import * as config from "./configuration";
+import ExtendedMap from "./utils/classes/extendedMap";
 
 const REGION_REGEX = /#region (.*)\n(?:.|\n)*?#endregion/g;
 
 export default class RegionRangesProvider implements BetterFoldingRangeProvider {
-  public async provideFoldingRanges(
-    document: TextDocument,
-    context?: FoldingContext | undefined,
-    token?: CancellationToken | undefined,
-    useCachedRanges?: boolean | undefined
-  ): Promise<BetterFoldingRange[]> {
+  //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
+  private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
+
+  constructor() {
+    this.documentToFoldingRanges = new ExtendedMap(async () => []);
+  }
+
+  public updateRanges(document: TextDocument) {
+    this.documentToFoldingRanges.set(document.uri, this.calculateFoldingRanges(document));
+  }
+
+  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
+    return this.documentToFoldingRanges.get(document.uri);
+  }
+
+  private async calculateFoldingRanges(document: TextDocument) {
     //TODO: Optimize this by caching ranges.
     if (!config.showOnlyRegionsDescriptions()) return [];
 
@@ -36,4 +47,6 @@ export default class RegionRangesProvider implements BetterFoldingRangeProvider 
 
     return ranges;
   }
+
+  public restart() {}
 }
