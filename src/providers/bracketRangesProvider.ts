@@ -1,26 +1,24 @@
-import { CancellationToken, FoldingContext, Position, TextDocument, Uri } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "../types";
+import { Position, TextDocument } from "vscode";
+import { BetterFoldingRange } from "../types";
 import * as config from "../configuration";
 import { bracketsToBracketsRanges } from "../utils/functions/utils";
 import BracketsManager from "../bracket-pair-colorizer-2 src/bracketsManager";
 import BracketsRange from "../utils/classes/bracketsRange";
 import ExtendedMap from "../utils/classes/extendedMap";
 import Token from "../bracket-pair-colorizer-2 src/token";
+import BetterFoldingRangeProvider from "./betterFoldingRangeProvider";
 
 type PositionPair = [line: number, column: number];
 
-export class BracketRangesProvider implements BetterFoldingRangeProvider {
+export class BracketRangesProvider extends BetterFoldingRangeProvider {
   private bracketsManager: BracketsManager = new BracketsManager();
-
-  //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
-  private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
 
   private positionToBracketRange: ExtendedMap<PositionPair, BracketsRange | undefined>;
   private positionToFoldingRange: ExtendedMap<PositionPair, BetterFoldingRange | undefined>;
   private positionToToken: ExtendedMap<PositionPair, Token | undefined>;
 
   constructor() {
-    this.documentToFoldingRanges = new ExtendedMap(async () => []);
+    super();
 
     this.positionToBracketRange = new ExtendedMap(() => undefined);
     this.positionToFoldingRange = new ExtendedMap(() => undefined);
@@ -33,15 +31,7 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
     this.bracketsManager.updateAllDocuments();
   }
 
-  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
-    return this.documentToFoldingRanges.get(document.uri);
-  }
-
-  public updateRanges(document: TextDocument) {
-    this.documentToFoldingRanges.set(document.uri, this.calculateFoldingRanges(document));
-  }
-
-  private async calculateFoldingRanges(document: TextDocument) {
+  protected async calculateFoldingRanges(document: TextDocument) {
     const tokenizedDocument = await this.bracketsManager.updateDocument(document);
     if (!tokenizedDocument) return [];
 
@@ -205,8 +195,8 @@ export class BracketRangesProvider implements BetterFoldingRangeProvider {
   }
 
   public restart() {
+    super.restart();
     this.bracketsManager = new BracketsManager();
-    this.documentToFoldingRanges.clear();
     this.positionToFoldingRange.clear();
   }
 }

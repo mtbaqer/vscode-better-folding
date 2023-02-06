@@ -1,28 +1,16 @@
-import { TextDocument, FoldingContext, CancellationToken, Range, Uri } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "../types";
+import { TextDocument, Range } from "vscode";
+import { BetterFoldingRange } from "../types";
 import { parse } from "@typescript-eslint/typescript-estree";
 import { JSXElement, BaseNode } from "@typescript-eslint/types/dist/generated/ast-spec";
 import * as config from "../configuration";
-import ExtendedMap from "../utils/classes/extendedMap";
+import BetterFoldingRangeProvider from "./betterFoldingRangeProvider";
 
-export default class JsxRangesProvider implements BetterFoldingRangeProvider {
-  //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.
-  private documentToFoldingRanges: ExtendedMap<Uri, Promise<BetterFoldingRange[]>>;
-
+export default class JsxRangesProvider extends BetterFoldingRangeProvider {
   constructor() {
-    this.documentToFoldingRanges = new ExtendedMap(async () => []);
+    super();
   }
 
-  public async provideFoldingRanges(document: TextDocument): Promise<BetterFoldingRange[]> {
-    return this.documentToFoldingRanges.get(document.uri);
-  }
-
-  public updateRanges(document: TextDocument) {
-    if (document.languageId !== "javascriptreact" && document.languageId !== "typescriptreact") return [];
-    this.documentToFoldingRanges.set(document.uri, this.calculateFoldingRanges(document));
-  }
-
-  private async calculateFoldingRanges(document: TextDocument) {
+  protected async calculateFoldingRanges(document: TextDocument) {
     const jsxElements: JSXElement[] = [];
     try {
       const ast = parse(document.getText(), { jsx: true, loc: true, range: true });
@@ -30,7 +18,7 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
 
       return this.jsxElementsToFoldingRanges(jsxElements, document);
     } catch (e) {
-      return this.documentToFoldingRanges.get(document.uri);
+      return this.provideFoldingRanges(document);
     }
   }
 
@@ -114,6 +102,4 @@ export default class JsxRangesProvider implements BetterFoldingRangeProvider {
     const linesCount = jsxElement.loc.end.line - jsxElement.loc.start.line - 1;
     return `… ${linesCount} lines …`;
   }
-
-  public restart() {}
 }

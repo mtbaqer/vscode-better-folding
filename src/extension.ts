@@ -7,7 +7,8 @@ import RegionRangesProvider from "./providers/regionRangesProvider";
 import JsxRangesProvider from "./providers/jsxRangesProvider";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
 import ZenFoldingDecorator from "./decorators/zenFoldingDecorator";
-import { BetterFoldingRangeProvider, ProvidersList } from "./types";
+import { ProvidersList } from "./types";
+import BetterFoldingRangeProvider from "./providers/betterFoldingRangeProvider";
 
 const bracketRangesProvider = new BracketRangesProvider();
 const providers: ProvidersList = [

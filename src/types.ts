@@ -1,6 +1,7 @@
-import { CancellationToken, FoldingContext, FoldingRange, FoldingRangeKind, TextDocument } from "vscode";
+import { FoldingRange, FoldingRangeKind } from "vscode";
 import Bracket from "./bracket-pair-colorizer-2 src/bracket";
 import Token from "./bracket-pair-colorizer-2 src/token";
+import BetterFoldingRangeProvider from "./providers/betterFoldingRangeProvider";
 
 export interface BetterFoldingRange extends FoldingRange {
   start: number;
@@ -8,17 +9,6 @@ export interface BetterFoldingRange extends FoldingRange {
   startColumn?: number;
   kind?: FoldingRangeKind;
   collapsedText?: string;
-}
-
-export interface BetterFoldingRangeProvider {
-  updateRanges: (document: TextDocument) => void;
-  provideFoldingRanges(
-    document: TextDocument,
-    context?: FoldingContext,
-    token?: CancellationToken,
-    useCachedRanges?: boolean
-  ): Promise<BetterFoldingRange[]>;
-  restart: () => void;
 }
 
 export interface TokenizedDocument {

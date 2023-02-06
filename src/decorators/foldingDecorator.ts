@@ -7,13 +7,14 @@ import {
   Uri,
   window,
 } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider, ProvidersList } from "../types";
+import { BetterFoldingRange, ProvidersList } from "../types";
 import ExtendedMap from "../utils/classes/extendedMap";
 import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "../utils/functions/utils";
 import * as config from "../configuration";
 import FoldedLinesManager from "../utils/classes/foldedLinesManager";
 import { DEFAULT_COLLAPSED_TEXT } from "../constants";
 import BetterFoldingDecorator from "./betterFoldingDecorator";
+import BetterFoldingRangeProvider from "../providers/betterFoldingRangeProvider";
 
 export default class FoldingDecorator extends BetterFoldingDecorator {
   providers: Record<string, BetterFoldingRangeProvider[]> = {};
@@ -69,7 +70,7 @@ export default class FoldingDecorator extends BetterFoldingDecorator {
     const allProviders = [...languageProviders, ...universalProviders];
 
     for (const provider of allProviders) {
-      const providerRanges = await provider.provideFoldingRanges(document, undefined, undefined, true);
+      const providerRanges = await provider.provideFoldingRanges(document);
       ranges.push(...providerRanges);
     }
 
