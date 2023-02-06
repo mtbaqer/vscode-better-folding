@@ -6,6 +6,7 @@ import * as config from "./configuration";
 import RegionRangesProvider from "./regionRangesProvider";
 import JsxRangesProvider from "./jsxRangesProvider";
 import FoldedLinesManager from "./foldedLinesManager";
+import ZenFoldingDecorator from "./zenFoldingDecorator";
 
 const bracketRangesProvider = new BracketRangesProvider();
 const regionProvider = new RegionRangesProvider();
@@ -14,6 +15,8 @@ let foldingDecorator = new FoldingDecorator([bracketRangesProvider, regionProvid
 
 foldingDecorator.registerFoldingRangeProvider("javascriptreact", jsxRangesProvider);
 foldingDecorator.registerFoldingRangeProvider("typescriptreact", jsxRangesProvider);
+
+let zenFoldingDecorator = new ZenFoldingDecorator();
 
 const registeredLanguages = new Set<string>();
 
@@ -31,13 +34,14 @@ export function activate(context: ExtensionContext) {
     }),
 
     workspace.onDidChangeTextDocument((e) => {
-      foldingDecorator.onChange(e);
+      zenFoldingDecorator.onChange(e);
       jsxRangesProvider.provideFoldingRanges(e.document);
       bracketRangesProvider.provideFoldingRanges(e.document);
     }),
 
     window.onDidChangeTextEditorVisibleRanges((e) => {
       FoldedLinesManager.updateFoldedLines(e.textEditor);
+      zenFoldingDecorator.triggerUpdateDecorations(e.textEditor);
       foldingDecorator.triggerUpdateDecorations(e.textEditor);
     })
   );
@@ -48,11 +52,11 @@ export function activate(context: ExtensionContext) {
   //TODO: clean this up.
   const createZenFoldsAroundSelection = "betterFolding.createZenFoldsAroundSelection";
   context.subscriptions.push(
-    commands.registerCommand(createZenFoldsAroundSelection, () => foldingDecorator.createZenFoldsAroundSelection())
+    commands.registerCommand(createZenFoldsAroundSelection, () => zenFoldingDecorator.createZenFoldsAroundSelection())
   );
 
   const clearZenFolds = "betterFolding.clearZenFolds";
-  context.subscriptions.push(commands.registerCommand(clearZenFolds, () => foldingDecorator.clearZenFolds()));
+  context.subscriptions.push(commands.registerCommand(clearZenFolds, () => zenFoldingDecorator.clearZenFolds()));
 }
 
 // Courtesy of vscode-explicit-fold,
@@ -81,6 +85,7 @@ function updateAllDocuments() {
   bracketRangesProvider.updateAllDocuments();
   setTimeout(async () => {
     FoldedLinesManager.updateAllFoldedLines();
+    zenFoldingDecorator.triggerUpdateDecorations();
     foldingDecorator.triggerUpdateDecorations();
   }, 500);
 }
@@ -97,4 +102,5 @@ function restart() {
 
 export function deactivate() {
   foldingDecorator.dispose();
+  zenFoldingDecorator.dispose();
 }
