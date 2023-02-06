@@ -1,12 +1,12 @@
 import { commands, ExtensionContext, languages, window, workspace } from "vscode";
 import { BracketRangesProvider } from "./providers/bracketRangesProvider";
 import { CLEAR_ZEN_FOLDS_COMMAND, CONFIG_ID, CREATE_ZEN_FOLDS_COMMAND } from "./constants";
-import FoldingDecorator from "./foldingDecorator";
+import FoldingDecorator from "./decorators/foldingDecorator";
 import * as config from "./configuration";
 import RegionRangesProvider from "./providers/regionRangesProvider";
 import JsxRangesProvider from "./providers/jsxRangesProvider";
 import FoldedLinesManager from "./utils/classes/foldedLinesManager";
-import ZenFoldingDecorator from "./zenFoldingDecorator";
+import ZenFoldingDecorator from "./decorators/zenFoldingDecorator";
 import { BetterFoldingRangeProvider, ProvidersList } from "./types";
 
 const bracketRangesProvider = new BracketRangesProvider();

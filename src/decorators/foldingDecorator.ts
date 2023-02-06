@@ -7,12 +7,12 @@ import {
   Uri,
   window,
 } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider, ProvidersList } from "./types";
-import ExtendedMap from "./utils/classes/extendedMap";
-import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/functions/utils";
-import * as config from "./configuration";
-import FoldedLinesManager from "./utils/classes/foldedLinesManager";
-import { DEFAULT_COLLAPSED_TEXT } from "./constants";
+import { BetterFoldingRange, BetterFoldingRangeProvider, ProvidersList } from "../types";
+import ExtendedMap from "../utils/classes/extendedMap";
+import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "../utils/functions/utils";
+import * as config from "../configuration";
+import FoldedLinesManager from "../utils/classes/foldedLinesManager";
+import { DEFAULT_COLLAPSED_TEXT } from "../constants";
 import BetterFoldingDecorator from "./betterFoldingDecorator";
 
 export default class FoldingDecorator extends BetterFoldingDecorator {

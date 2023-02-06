@@ -9,9 +9,9 @@ import {
   window,
 } from "vscode";
 import BetterFoldingDecorator from "./betterFoldingDecorator";
-import { DEFAULT_COLLAPSED_TEXT } from "./constants";
-import { BookmarksManager } from "./utils/classes/bookmarksManager";
-import FoldedLinesManager from "./utils/classes/foldedLinesManager";
+import { DEFAULT_COLLAPSED_TEXT } from "../constants";
+import { BookmarksManager } from "../utils/classes/bookmarksManager";
+import FoldedLinesManager from "../utils/classes/foldedLinesManager";
 
 export default class ZenFoldingDecorator extends BetterFoldingDecorator {
   private zenFoldingDecoration: TextEditorDecorationType;
