@@ -1,7 +1,7 @@
 import { TextDocument, FoldingContext, CancellationToken, FoldingRangeKind, Uri } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
-import * as config from "./configuration";
-import ExtendedMap from "./utils/classes/extendedMap";
+import { BetterFoldingRange, BetterFoldingRangeProvider } from "../types";
+import * as config from "../configuration";
+import ExtendedMap from "../utils/classes/extendedMap";
 
 const REGION_REGEX = /#region (.*)\n(?:.|\n)*?#endregion/g;
 

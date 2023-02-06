@@ -1,11 +1,11 @@
 import { commands, ExtensionContext, languages, window, workspace } from "vscode";
-import { BracketRangesProvider } from "./bracketRangesProvider";
+import { BracketRangesProvider } from "./providers/bracketRangesProvider";
 import { CONFIG_ID } from "./configuration";
 import FoldingDecorator from "./foldingDecorator";
 import * as config from "./configuration";
-import RegionRangesProvider from "./regionRangesProvider";
-import JsxRangesProvider from "./jsxRangesProvider";
-import FoldedLinesManager from "./foldedLinesManager";
+import RegionRangesProvider from "./providers/regionRangesProvider";
+import JsxRangesProvider from "./providers/jsxRangesProvider";
+import FoldedLinesManager from "./utils/classes/foldedLinesManager";
 import ZenFoldingDecorator from "./zenFoldingDecorator";
 import { BetterFoldingRangeProvider, ProvidersList } from "./types";
 

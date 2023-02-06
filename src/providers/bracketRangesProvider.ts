@@ -1,11 +1,11 @@
 import { CancellationToken, FoldingContext, Position, TextDocument, Uri } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
-import * as config from "./configuration";
-import { bracketsToBracketsRanges } from "./utils/utils";
-import BracketsManager from "./bracket-pair-colorizer-2 src/bracketsManager";
-import BracketsRange from "./utils/classes/bracketsRange";
-import ExtendedMap from "./utils/classes/extendedMap";
-import Token from "./bracket-pair-colorizer-2 src/token";
+import { BetterFoldingRange, BetterFoldingRangeProvider } from "../types";
+import * as config from "../configuration";
+import { bracketsToBracketsRanges } from "../utils/functions/utils";
+import BracketsManager from "../bracket-pair-colorizer-2 src/bracketsManager";
+import BracketsRange from "../utils/classes/bracketsRange";
+import ExtendedMap from "../utils/classes/extendedMap";
+import Token from "../bracket-pair-colorizer-2 src/token";
 
 type PositionPair = [line: number, column: number];
 

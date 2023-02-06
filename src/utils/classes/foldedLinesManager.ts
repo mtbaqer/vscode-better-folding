@@ -1,5 +1,5 @@
 import { Range, TextEditor, Uri, window } from "vscode";
-import ExtendedMap from "./utils/classes/extendedMap";
+import ExtendedMap from "./extendedMap";
 
 class FoldedLinesManager {
   //Singleton

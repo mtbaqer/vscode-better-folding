@@ -9,9 +9,9 @@ import {
   TextEditorDecorationType,
   window,
 } from "vscode";
-import { BookmarksManager } from "./bookmarksManager";
-import FoldedLinesManager from "./foldedLinesManager";
-import newDecorationOptions from "./utils/newDecorationOptions";
+import { BookmarksManager } from "./utils/classes/bookmarksManager";
+import FoldedLinesManager from "./utils/classes/foldedLinesManager";
+import newDecorationOptions from "./utils/functions/newDecorationOptions";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 

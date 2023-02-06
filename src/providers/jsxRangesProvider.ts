@@ -1,9 +1,9 @@
 import { TextDocument, FoldingContext, CancellationToken, Range, Uri } from "vscode";
-import { BetterFoldingRange, BetterFoldingRangeProvider } from "./types";
+import { BetterFoldingRange, BetterFoldingRangeProvider } from "../types";
 import { parse } from "@typescript-eslint/typescript-estree";
 import { JSXElement, BaseNode } from "@typescript-eslint/types/dist/generated/ast-spec";
-import * as config from "./configuration";
-import ExtendedMap from "./utils/classes/extendedMap";
+import * as config from "../configuration";
+import ExtendedMap from "../utils/classes/extendedMap";
 
 export default class JsxRangesProvider implements BetterFoldingRangeProvider {
   //Promisized to allow useCachedRanges to await for the foldingRanges currently being calculated.

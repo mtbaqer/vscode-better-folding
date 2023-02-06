@@ -10,10 +10,10 @@ import {
 } from "vscode";
 import { BetterFoldingRange, BetterFoldingRangeProvider, ProvidersList } from "./types";
 import ExtendedMap from "./utils/classes/extendedMap";
-import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/utils";
+import { foldingRangeToRange, groupArrayToMap, rangeToInlineRange } from "./utils/functions/utils";
 import * as config from "./configuration";
-import FoldedLinesManager from "./foldedLinesManager";
-import newDecorationOptions from "./utils/newDecorationOptions";
+import FoldedLinesManager from "./utils/classes/foldedLinesManager";
+import newDecorationOptions from "./utils/functions/newDecorationOptions";
 
 const DEFAULT_COLLAPSED_TEXT = "…";
 
