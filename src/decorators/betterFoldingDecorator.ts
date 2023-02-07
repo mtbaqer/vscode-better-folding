@@ -38,7 +38,7 @@ export default abstract class BetterFoldingDecorator extends Disposable {
         width: "0",
         height: "0",
         contentText,
-        color: "rgba(255, 255, 255, 0.5)", //TODO: Get this from the theme
+        color: "grey",
         margin: `0 -${90}% 0 0`, //Hides the original collapsed text '…'
         textDecoration: "none; cursor: pointer !important;",
       },
