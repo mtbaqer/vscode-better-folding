@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.4.0] - 2023-02-07
+
+### Changed
+
+- showOnlyRegionsDescriptions settings now defaults to false.
+
+### Fixed
+
+- Improved performance significantly. Extension should run 2-3 times faster now.
+- Fixed collapsed text not showing in bright themes. (not that we support such practices).
+
 ## [0.3.1] - 2023-02-03
 
 ### Fixed
