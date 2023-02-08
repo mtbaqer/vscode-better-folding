@@ -74,7 +74,7 @@
         "betterFolding.showOnlyRegionsDescriptions": {
           "order": 6,
           "type": "boolean",
-          "default": true,
+          "default": false,
           "markdownDescription": "Only shows the region description in the collapsed text. \n\nExample: `// #region some text`.\n\nBecomes: `some text`."
         },
         "betterFolding.excludedLanguages": {
