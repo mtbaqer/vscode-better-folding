@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.5.0] - 2023-02-010
+
+### Added
+
+- Support showing the first property in a folded object literal.
+- New config option to showing folded object previews.
+
+### Fixed
+
+- Fixed the extension not working on files that have an empty bracket ranges as first range.
+
 ## [0.4.0] - 2023-02-07
 
 ### Changed
