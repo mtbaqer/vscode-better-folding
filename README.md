@@ -73,7 +73,7 @@ This is the first release of the extension, so it is not fully battle tested yet
 
 <p align="center">
 <img
-  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/foldingTags.png"
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/foldingTags2.png"
   alt="Better Folding Extension Folding Closing Tags Preview"
 />
 </p>
