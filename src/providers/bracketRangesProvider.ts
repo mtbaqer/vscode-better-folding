@@ -96,7 +96,7 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     let collapsedText = this.getCollapsedText(bracketsRange, document);
 
     if (showFoldedBrackets) {
-      [start, end, collapsedText] = this.appendPostFoldingRangeText(bracketsRange, collapsedText, document);
+      [end, collapsedText] = this.appendPostFoldingRangeText(bracketsRange, collapsedText, document);
     }
 
     return { start, end, startColumn, collapsedText };
@@ -110,7 +110,7 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     return bracketsRange.start.character; //Position.character is confusingly the column.
   }
 
-  private getCollapsedText(bracketsRange: BracketsRange, document: TextDocument): string {
+  private getCollapsedText(bracketsRange: BracketsRange, document: TextDocument, shallow = false): string {
     let collapsedText = "…";
 
     const showFoldedBodyLinesCount = config.showFoldedBodyLinesCount();
@@ -121,6 +121,10 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     const showFunctionParameters = config.showFunctionParameters();
     if (showFunctionParameters && bracketsRange.startBracket.token.content === "(") {
       collapsedText = this.getFunctionParamsCollapsedText(bracketsRange, document);
+    }
+
+    if (this.isObjectLiteral(bracketsRange) && !shallow) {
+      collapsedText = this.getObjectLiteralCollapsedText(bracketsRange, document);
     }
 
     const showFoldedBrackets = config.showFoldedBrackets();
@@ -158,6 +162,64 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     return paramTokens.length ? paramTokens.join(", ") : "…";
   }
 
+  private isObjectLiteral(bracketsRange: BracketsRange): boolean {
+    if (bracketsRange.startBracket.token.content === "{") {
+      const { scopes } = bracketsRange.startBracket.token;
+      if (scopes.some((scope) => scope.startsWith("punctuation.definition.dict.begin"))) return true;
+      if (scopes.some((scope) => scope.startsWith("meta.objectliteral"))) return true;
+    }
+
+    return false;
+  }
+
+  private getObjectLiteralCollapsedText(bracketsRange: BracketsRange, document: TextDocument): string {
+    let collapsedText = "";
+
+    let foundText = false;
+
+    let line = bracketsRange.start.line;
+    let column = bracketsRange.start.character + 1;
+    let lineText = document.lineAt(line).text;
+
+    while (new Position(line, column).isBefore(bracketsRange.end)) {
+      const [end, rangeCollapsedText] = this.getShallowCollapsedText([line, column], document);
+      if (rangeCollapsedText) {
+        collapsedText += rangeCollapsedText;
+        line = end + 1;
+        break;
+      }
+      if (column >= lineText.length) {
+        line++;
+        column = -1;
+        lineText = document.lineAt(line).text;
+        if (foundText) break;
+      }
+      if (lineText[column]) {
+        foundText = true;
+        collapsedText += lineText[column];
+      }
+      column++;
+    }
+
+    if (line < bracketsRange.end.line) {
+      collapsedText += "…";
+    }
+
+    return " " + collapsedText + " ";
+  }
+
+  private getShallowCollapsedText(
+    [line, column]: PositionPair,
+    document: TextDocument
+  ): [end: number, collapsedText: string] {
+    const bracketsRange = this.positionToBracketRange.get([line, column]);
+    if (bracketsRange) {
+      let currentRangeCollapsedText = this.getCollapsedText(bracketsRange, document, true);
+      return this.appendPostFoldingRangeText(bracketsRange, currentRangeCollapsedText, document);
+    }
+    return [line, ""];
+  }
+
   private surroundWithBrackets(bracketsRange: BracketsRange, collapsedText: string): string {
     return `${bracketsRange.startBracket.token.content}${collapsedText}${bracketsRange.endBracket.token.content}`;
   }
@@ -171,7 +233,7 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     bracketsRange: BracketsRange,
     initialCollapsedText: string,
     document: TextDocument
-  ): [start: number, end: number, collapsedText: string] {
+  ): [end: number, collapsedText: string] {
     const chainFoldingRanges = config.chainFoldingRanges();
 
     let end = bracketsRange.end.line;
@@ -191,7 +253,7 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
       collapsedText += lineContent[column];
     }
 
-    return [bracketsRange.start.line, end, collapsedText];
+    return [end, collapsedText];
   }
 
   public restart() {

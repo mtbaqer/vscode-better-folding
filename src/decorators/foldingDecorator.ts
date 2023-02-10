@@ -82,6 +82,7 @@ export default class FoldingDecorator extends BetterFoldingDecorator {
     const unfoldedRanges: Range[] = [];
     for (const [collapsedText, decoration] of Object.entries(decorations)) {
       const foldingRanges = collapsedTextToFoldingRanges.get(collapsedText)!;
+      if (!foldingRanges) continue;
       const ranges: Range[] = foldingRanges.map(foldingRangeToRange(editor.document));
 
       const foldedRanges: Range[] = [];
