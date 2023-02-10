@@ -39,6 +39,7 @@ export function rangeToInlineRange(document: TextDocument): (range: Range) => Ra
 
 export function bracketsToBracketsRanges(brackets: Bracket[], sortBy: "end" | "start" = "end"): BracketsRange[] {
   const ranges: BracketsRange[] = [];
+
   for (let i = brackets.length - 1; i >= 0; i--) {
     const bracket = brackets[i];
     if (bracket instanceof BracketClose) {
@@ -49,5 +50,20 @@ export function bracketsToBracketsRanges(brackets: Bracket[], sortBy: "end" | "s
       }
     }
   }
-  return sortBy === "end" ? ranges : ranges.reverse();
+
+  ranges.sort((a, b) => {
+    if (a.end.isAfter(b.end)) {
+      if (a.contains(b)) {
+        return 1;
+      }
+      return -1;
+    }
+
+    if (b.contains(a)) {
+      return -1;
+    }
+    return 1;
+  });
+
+  return sortBy === "start" ? ranges.reverse() : ranges;
 }
