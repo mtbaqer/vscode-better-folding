@@ -79,7 +79,6 @@ export default class FoldingDecorator extends BetterFoldingDecorator {
       DEFAULT_COLLAPSED_TEXT
     );
 
-    const unfoldedRanges: Range[] = [];
     for (const [collapsedText, decoration] of Object.entries(decorations)) {
       const foldingRanges = collapsedTextToFoldingRanges.get(collapsedText)!;
       if (!foldingRanges) continue;
@@ -88,7 +87,6 @@ export default class FoldingDecorator extends BetterFoldingDecorator {
       const foldedRanges: Range[] = [];
       for (const range of ranges) {
         if (FoldedLinesManager.isFolded(range, editor)) foldedRanges.push(range);
-        else unfoldedRanges.push(range);
       }
 
       const inlineFoldedRanges = foldedRanges.map(rangeToInlineRange(editor.document));
