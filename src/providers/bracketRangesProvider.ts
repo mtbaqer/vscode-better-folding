@@ -213,8 +213,11 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
     document: TextDocument
   ): [end: number, collapsedText: string] {
     const bracketsRange = this.positionToBracketRange.get([line, column]);
-    if (bracketsRange) {
-      let currentRangeCollapsedText = this.getCollapsedText(bracketsRange, document, true);
+    const emptyBracketsRange = bracketsRange?.startBracket.token.range.end.isEqual(
+      bracketsRange.endBracket.token.range.start
+    );
+    if (bracketsRange && !emptyBracketsRange) {
+      const currentRangeCollapsedText = this.getCollapsedText(bracketsRange, document, true);
       return this.appendPostFoldingRangeText(bracketsRange, currentRangeCollapsedText, document);
     }
     return [line, ""];
