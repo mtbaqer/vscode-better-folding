@@ -32,3 +32,7 @@ export function showFunctionParameters() {
 export function chainFoldingRanges() {
   return workspace.getConfiguration(CONFIG_ID).get<boolean>("chainFoldingRanges") && showFoldedBrackets();
 }
+
+export function showObjectPreviews() {
+  return workspace.getConfiguration(CONFIG_ID).get<boolean>("showObjectPreviews") && showFoldedBrackets();
+}

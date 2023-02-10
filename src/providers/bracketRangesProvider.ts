@@ -123,7 +123,8 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
       collapsedText = this.getFunctionParamsCollapsedText(bracketsRange, document);
     }
 
-    if (this.isObjectLiteral(bracketsRange) && !shallow) {
+    const showObjectPreviews = config.showObjectPreviews();
+    if (showObjectPreviews && this.isObjectLiteral(bracketsRange) && !shallow) {
       collapsedText = this.getObjectLiteralCollapsedText(bracketsRange, document);
     }
 

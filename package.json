@@ -77,6 +77,12 @@
           "default": false,
           "markdownDescription": "Only shows the region description in the collapsed text. \n\nExample: `// #region some text`.\n\nBecomes: `some text`."
         },
+        "betterFolding.showObjectPreviews": {
+          "order": 6,
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show the first property in the collapsed text of an object literal. Only applies if `#betterFolding.showFoldedBrackets#` is `enabled`. \n\nExample: `{ id:'123',… }`."
+        },
         "betterFolding.excludedLanguages": {
           "order": 7,
           "type": "array",
