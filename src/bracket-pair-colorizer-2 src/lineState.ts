@@ -51,8 +51,15 @@ export default class LineState {
     this.bracketManager.offset(startIndex, amount);
   }
 
-  public addBracket(type: number, character: string, beginIndex: number, lineIndex: number, open: boolean) {
-    const token = new Token(type, character, beginIndex, lineIndex);
+  public addBracket(
+    type: number,
+    character: string,
+    beginIndex: number,
+    lineIndex: number,
+    open: boolean,
+    scopes: string[] | undefined
+  ) {
+    const token = new Token(type, character, beginIndex, lineIndex, scopes);
     if (open) {
       this.addOpenBracket(token);
     } else {

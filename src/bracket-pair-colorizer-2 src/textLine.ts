@@ -29,8 +29,8 @@ export default class TextLine {
     return this.lineState.getBracketHash();
   }
 
-  public addBracket(currentChar: string, index: number, key: number, open: boolean) {
-    this.lineState.addBracket(key, currentChar, index, this.index, open);
+  public addBracket(currentChar: string, index: number, key: number, open: boolean, scopes: string[] | undefined) {
+    this.lineState.addBracket(key, currentChar, index, this.index, open, scopes);
   }
 
   public getClosingBracket(position: Position): BracketClose | undefined {

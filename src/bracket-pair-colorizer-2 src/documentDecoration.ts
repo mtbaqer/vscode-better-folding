@@ -168,8 +168,10 @@ export default class DocumentDecoration {
     const newLine = new TextLine(tokenized2.ruleStack, previousLineState, index);
     for (const match of matches) {
       const lookup = this.languageConfig.bracketToId.get(match.content);
+
       if (lookup) {
-        newLine.addBracket(match.content, match.index, lookup.key, lookup.open);
+        const token = startIndexToToken.get(match.index);
+        newLine.addBracket(match.content, match.index, lookup.key, lookup.open, token?.scopes);
       }
     }
 
