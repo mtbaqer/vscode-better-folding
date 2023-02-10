@@ -78,6 +78,15 @@ This is the first release of the extension, so it is not fully battle tested yet
 />
 </p>
 
+### Show objects preview
+
+<p align="center">
+<img
+  src="https://raw.githubusercontent.com/mtbaqer/vscode-better-folding/main/demo-media/images/objectPreview.png"
+  alt="Better Folding Extension Folding Showing Object Previews Preview"
+/>
+</p>
+
 ### Zen Folding
 
 <p align="center">
@@ -93,8 +102,6 @@ This is the first release of the extension, so it is not fully battle tested yet
 ### Show function content for short functions
 Based on [microsoft/vscode#76396](https://github.com/microsoft/vscode/issues/76396)
 
-### Show objects preview
-Based on [microsoft/vscode#168028](https://github.com/microsoft/vscode/issues/168028)
 
 ## Supported Languages:
 **Most brackets-based languages:** JavaScript, TypeScript, C, C#, C++, Java, Kotlin, PHP, Go (Golang), Dart, Rust, Swift, CSS, LESS, SCSS and more...
@@ -102,23 +109,6 @@ Based on [microsoft/vscode#168028](https://github.com/microsoft/vscode/issues/16
 **XML-based languages:** JSX and TSX.
 
 **Work in progress:** HTML.
-
-## Settings
-
-For example:
-
-This extension contributes the following settings:
-
-- `betterFolding.foldClosingBrackets`: Include closing brackets like `}` and `]` in the folding range. extension.
-- `betterFolding.showFoldedBodyLinesCount`: Shows the number of lines folded, excluding the closing bracket line.
-<br />Example: `function example() { ⋯ 3 lines ⋯ `.
-- `betterFolding.showFoldedBrackets`: 
-Shows brackets like `{` and `}` in the collapsed text.
-<br />Example: `function example() {…}`.
-- `betterFolding.showOnlyRegionsDescriptions`: Only shows the region description in the collapsed text. 
-<br />Example: `//#region some text ⋯`.
-<br />Becomes: `some text`.
-- `betterFolding.excludedLanguages`: List of languages to exclude from folding.
 
 ## Known Issues
 
