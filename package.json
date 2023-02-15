@@ -2,7 +2,7 @@
   "name": "better-folding",
   "displayName": "Better Folding",
   "description": "Improve the folding experience in VS Code",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "engines": {
     "vscode": "^1.74.0"
   },
