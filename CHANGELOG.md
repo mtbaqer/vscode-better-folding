@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.5.1] - 2023-02-010
+
+### Fixed
+
+- Fixed closing brackets not folding correctly if user changes settings while having another document open.
+
 ## [0.5.0] - 2023-02-010
 
 ### Added
