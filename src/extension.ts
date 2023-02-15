@@ -28,7 +28,10 @@ export function activate(context: ExtensionContext) {
     foldingDecorator,
 
     workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration(CONFIG_ID)) restart();
+      if (event.affectsConfiguration(CONFIG_ID)) {
+        restart();
+        updateAllDocuments();
+      }
     }),
 
     window.onDidChangeVisibleTextEditors(() => {
@@ -72,7 +75,7 @@ function registerProviders(context: ExtensionContext) {
 }
 
 // Courtesy of vscode-explicit-fold,
-// apparently if you delay the folding provider by a second, it can override the default language folding provider.
+// apparently if you delay the folding provider, it can override the default language folding provider.
 function registerProvider(context: ExtensionContext, selector: string, provider: BetterFoldingRangeProvider) {
   setTimeout(() => {
     context.subscriptions.push(languages.registerFoldingRangeProvider(selector, provider));
@@ -80,8 +83,11 @@ function registerProvider(context: ExtensionContext, selector: string, provider:
 }
 
 function updateAllDocuments() {
-  //Delayed since vscode does not provide the right visible ranges right away when opening a new document.
   bracketRangesProvider.updateAllDocuments();
+  for (const e of window.visibleTextEditors) {
+    providers.forEach(([_, provider]) => provider.updateRanges(e.document));
+  }
+  //Delayed since vscode does not provide the right visible ranges right away when opening a new document.
   setTimeout(async () => {
     for (const e of window.visibleTextEditors) {
       providers.forEach(([_, provider]) => provider.updateRanges(e.document));
