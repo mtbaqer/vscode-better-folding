@@ -1,3 +1,6 @@
+/**
+ * Courtesy of https://github.com/microsoft/vscode/issues/54147#issuecomment-1165843595
+ */
 import { Disposable, TextEditor, EventEmitter, TextDocumentChangeEvent } from "vscode";
 import {
   integer,
