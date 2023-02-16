@@ -231,7 +231,8 @@ export class BracketRangesProvider extends BetterFoldingRangeProvider {
   private getFoldedLinesCountCollapsedText(bracketsRange: BracketsRange): string {
     let linesCount = bracketsRange.end.line - bracketsRange.start.line - 1;
     linesCount = Math.max(linesCount, 0); //For empty ranges, the start and end lines are the same.
-    return ` ⋯ ${linesCount} lines ⋯ `;
+    const line = linesCount === 1 ? "line" : "lines";
+    return ` ⋯ ${linesCount} ${line} ⋯ `;
   }
 
   private appendPostFoldingRangeText(
