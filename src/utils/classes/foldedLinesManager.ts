@@ -1,6 +1,9 @@
 import { Range, TextEditor, Uri, window } from "vscode";
 import ExtendedMap from "./extendedMap";
 
+/**
+ * Util class to manage folded lines since vscode does not provide a way to tell if a line is folded or not.
+ */
 class FoldedLinesManager {
   //Singleton
   private static _instance: FoldedLinesManager;
@@ -20,7 +23,7 @@ class FoldedLinesManager {
   public updateFoldedLines(editor: TextEditor) {
     const { visibleRanges } = editor;
     if (visibleRanges.length === 0) return;
-    const cachedLines = this.getFoldedLines(editor);
+    let cachedLines = this.getFoldedLines(editor);
     const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
 
     if (cachedLines.length === 0) {
@@ -28,21 +31,24 @@ class FoldedLinesManager {
       return;
     }
 
-    //TODO: Optimize this.
-    //Match the folded lines between editor and cached lines.
+    cachedLines = this.matchFoldedLines(cachedLines, currentFoldedLines);
+    cachedLines = this.matchUnfoldedLines(cachedLines, currentFoldedLines, visibleRanges);
+
+    this.setFoldedLines(editor, cachedLines);
+  }
+
+  private matchFoldedLines(cachedLines: number[], currentFoldedLines: number[]) {
     const newFoldedLines = currentFoldedLines.filter((line) => !cachedLines.includes(line));
     cachedLines.push(...newFoldedLines);
     cachedLines.sort((a, b) => a - b);
+    return cachedLines;
+  }
 
-    //Match the unfolded lines between editor and cached lines.
-    const currentFoldedLinesSet = new Set(currentFoldedLines);
-    const cachedLinesMinusUnfoldedLines = cachedLines.filter(
-      (line) =>
-        currentFoldedLinesSet.has(line) ||
-        line < visibleRanges[0].start.line ||
-        line >= visibleRanges[visibleRanges.length - 1].end.line
-    );
-    this.setFoldedLines(editor, cachedLinesMinusUnfoldedLines);
+  private matchUnfoldedLines(cachedLines: number[], currentFoldedLines: number[], visibleRanges: readonly Range[]) {
+    const foldedLinesSet = new Set(currentFoldedLines);
+    const isOutsideViewport = (line: number) =>
+      line < visibleRanges[0].start.line || line >= visibleRanges.at(-1)!.end.line;
+    return cachedLines.filter((line) => foldedLinesSet.has(line) || isOutsideViewport(line));
   }
 
   public isFolded(range: Range, editor: TextEditor): boolean {
@@ -53,7 +59,7 @@ class FoldedLinesManager {
   }
 
   //TODO: clean this up.
-  //Band-aid fix for now.
+  //Band-aid fix because vscode does not provide a visible range if last folded line is the last line in document.
   private checkRangeAtEndOfDocumentCase(range: Range, editor: TextEditor) {
     const lastLine = editor.document.lineCount - 1;
     const justBeforeLastLine = lastLine - 1;
