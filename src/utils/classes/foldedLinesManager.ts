@@ -12,7 +12,7 @@ class FoldedLinesManager {
     return this._instance;
   }
 
-  private cachedFoldedLines: ExtendedMap<Uri, number[]> = new ExtendedMap(() => []);
+  private cachedFoldedLines: ExtendedMap<Uri, Set<number>> = new ExtendedMap(() => new Set());
 
   public updateAllFoldedLines() {
     for (const editor of window.visibleTextEditors) {
@@ -26,35 +26,32 @@ class FoldedLinesManager {
     let cachedLines = this.getFoldedLines(editor);
     const currentFoldedLines = visibleRanges.slice(0, -1).map((range) => range.end.line);
 
-    if (cachedLines.length === 0) {
-      this.setFoldedLines(editor, currentFoldedLines);
+    if (cachedLines.size === 0) {
+      this.setFoldedLines(editor, new Set(currentFoldedLines));
       return;
     }
 
-    cachedLines = this.matchFoldedLines(cachedLines, currentFoldedLines);
-    cachedLines = this.matchUnfoldedLines(cachedLines, currentFoldedLines, visibleRanges);
+    this.matchFoldedLines(cachedLines, currentFoldedLines);
+    this.matchUnfoldedLines(cachedLines, currentFoldedLines, visibleRanges);
 
     this.setFoldedLines(editor, cachedLines);
   }
 
-  private matchFoldedLines(cachedLines: number[], currentFoldedLines: number[]) {
-    const newFoldedLines = currentFoldedLines.filter((line) => !cachedLines.includes(line));
-    cachedLines.push(...newFoldedLines);
-    cachedLines.sort((a, b) => a - b);
-    return cachedLines;
+  private matchFoldedLines(cachedLines: Set<number>, currentFoldedLines: number[]) {
+    currentFoldedLines.forEach((line) => cachedLines.add(line));
   }
 
-  private matchUnfoldedLines(cachedLines: number[], currentFoldedLines: number[], visibleRanges: readonly Range[]) {
+  private matchUnfoldedLines(cachedLines: Set<number>, currentFoldedLines: number[], visibleRanges: readonly Range[]) {
     const foldedLinesSet = new Set(currentFoldedLines);
-    const isOutsideViewport = (line: number) =>
-      line < visibleRanges[0].start.line || line >= visibleRanges.at(-1)!.end.line;
-    return cachedLines.filter((line) => foldedLinesSet.has(line) || isOutsideViewport(line));
+    const isVisible = (l: number) => l >= visibleRanges[0].start.line && l < visibleRanges.at(-1)!.end.line;
+    for (const line of cachedLines) {
+      if (isVisible(line) && !foldedLinesSet.has(line)) cachedLines.delete(line);
+    }
   }
 
   public isFolded(range: Range, editor: TextEditor): boolean {
-    for (const cachedFoldedLine of this.getFoldedLines(editor)) {
-      if (cachedFoldedLine === range.start.line) return true;
-    }
+    const cachedLines = this.getFoldedLines(editor);
+    if (cachedLines.has(range.start.line)) return true;
     return this.checkRangeAtEndOfDocumentCase(range, editor);
   }
 
@@ -68,21 +65,19 @@ class FoldedLinesManager {
     const lastVisibleLine = editor.visibleRanges[editor.visibleRanges.length - 1].end.line;
 
     if (rangeAtEndOfDocument && lastVisibleLine <= range.start.line) {
-      this.getFoldedLines(editor).push(range.start.line);
+      this.getFoldedLines(editor).add(range.start.line);
       return true;
     }
-    this.setFoldedLines(
-      editor,
-      this.getFoldedLines(editor).filter((line) => line !== range.start.line)
-    );
+
+    this.getFoldedLines(editor).delete(range.start.line);
     return false;
   }
 
-  public getFoldedLines(editor: TextEditor): number[] {
+  public getFoldedLines(editor: TextEditor): Set<number> {
     return this.cachedFoldedLines.get(editor.document.uri);
   }
 
-  private setFoldedLines(editor: TextEditor, lines: number[]) {
+  private setFoldedLines(editor: TextEditor, lines: Set<number>) {
     this.cachedFoldedLines.set(editor.document.uri, lines);
   }
 }
